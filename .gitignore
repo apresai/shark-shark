@@ -54,3 +54,8 @@ next-env.d.ts
 .npm
 .eslintcache
 .turbo
+
+# CDK infrastructure
+infra/node_modules/
+infra/cdk.out/
+infra/dist/
