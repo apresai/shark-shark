@@ -7,8 +7,8 @@ import { Entity, FishSize, GameState, SeahorseEntity } from '../types';
 import { Fish } from '../entities/Fish';
 import { Crab } from '../entities/Crab';
 import { Jellyfish } from '../entities/Jellyfish';
-import { 
-  CANVAS_WIDTH, 
+import {
+  CANVAS_WIDTH,
   CANVAS_HEIGHT,
   FISH_SPAWN_Y_MIN,
   FISH_SPAWN_Y_MAX,
@@ -17,6 +17,7 @@ import {
   JELLYFISH_CONFIG
 } from '../constants';
 import { v4 as uuidv4 } from 'uuid';
+import { spriteLoader } from '../SpriteLoader';
 
 export class SpawnSystem {
   private fishSpawnTimer: number = 0;
@@ -316,27 +317,44 @@ class Seahorse implements SeahorseEntity {
 
     ctx.save();
 
-    // Draw seahorse as a colored rectangle (placeholder for sprite)
-    ctx.fillStyle = '#FFD700'; // Gold color
-    ctx.fillRect(
-      renderX - this.width / 2,
-      renderY - this.height / 2,
-      this.width,
-      this.height
-    );
-
-    // Draw "S" indicator
-    ctx.fillStyle = 'black';
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('S', renderX, renderY + 4);
-
-    // Draw lifetime indicator (fading effect)
+    // Draw lifetime indicator (fading effect) - applies to both sprite and fallback
     const remainingTime = SEAHORSE_CONFIG.lifetime - this.lifetime;
     if (remainingTime < 2) {
       // Flash when about to despawn
       const alpha = Math.sin(this.lifetime * 10) * 0.5 + 0.5;
       ctx.globalAlpha = alpha;
+    }
+
+    // Try to draw sprite, fallback to rectangle
+    const sprite = spriteLoader.getSeahorseSprite();
+    if (sprite && sprite.complete && sprite.naturalWidth > 0) {
+      ctx.drawImage(
+        sprite,
+        renderX - this.width / 2,
+        renderY - this.height / 2,
+        this.width,
+        this.height
+      );
+    } else {
+      // Fallback: Draw seahorse as a colored rectangle
+      ctx.fillStyle = '#FFD700'; // Gold color
+      ctx.fillRect(
+        renderX - this.width / 2,
+        renderY - this.height / 2,
+        this.width,
+        this.height
+      );
+
+      // Draw "S" indicator
+      ctx.fillStyle = 'black';
+      ctx.font = '12px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('S', renderX, renderY + 4);
+    }
+
+    // Draw warning border when about to despawn
+    if (remainingTime < 2) {
+      ctx.globalAlpha = 1;
       ctx.strokeStyle = 'red';
       ctx.lineWidth = 2;
       ctx.strokeRect(

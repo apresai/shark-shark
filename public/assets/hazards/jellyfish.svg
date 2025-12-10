@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 28" width="20" height="28">
+  <!-- Bell (dome) -->
+  <ellipse cx="10" cy="7" rx="9" ry="6" fill="#9370DB" fill-opacity="0.8"/>
+  <ellipse cx="10" cy="6" rx="7" ry="4" fill="#B19CD9" fill-opacity="0.6"/>
+  <ellipse cx="8" cy="5" rx="2" ry="1.5" fill="white" fill-opacity="0.4"/>
+
+  <!-- Bell bottom edge -->
+  <path d="M1,9 Q3,12 5,10 Q7,12 10,10 Q13,12 15,10 Q17,12 19,9" fill="#9370DB" fill-opacity="0.7"/>
+
+  <!-- Tentacles -->
+  <path d="M3,11 Q2,16 4,20 Q3,24 5,28" stroke="#663399" stroke-width="1.5" fill="none" stroke-opacity="0.9"/>
+  <path d="M7,11 Q6,15 7,19 Q6,23 7,27" stroke="#663399" stroke-width="1.5" fill="none" stroke-opacity="0.9"/>
+  <path d="M10,12 Q9,17 10,21 Q9,25 10,28" stroke="#663399" stroke-width="1.5" fill="none" stroke-opacity="0.9"/>
+  <path d="M13,11 Q14,15 13,19 Q14,23 13,27" stroke="#663399" stroke-width="1.5" fill="none" stroke-opacity="0.9"/>
+  <path d="M17,11 Q18,16 16,20 Q17,24 15,28" stroke="#663399" stroke-width="1.5" fill="none" stroke-opacity="0.9"/>
+
+  <!-- Inner glow effect -->
+  <ellipse cx="10" cy="7" rx="5" ry="3" fill="#DDA0DD" fill-opacity="0.3"/>
+</svg>

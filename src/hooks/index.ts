@@ -10,3 +10,6 @@ export type { UseGameLoopOptions, UseGameLoopReturn } from './useGameLoop';
 
 export { useAudio, useGameAudioEvents, useSharkAudioEvents } from './useAudio';
 export type { UseAudioOptions, UseAudioReturn } from './useAudio';
+
+export { useWindowSize } from './useWindowSize';
+export type { WindowSize } from './useWindowSize';

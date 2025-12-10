@@ -36,15 +36,19 @@ export const CANVAS_ASPECT_RATIO = CANVAS_WIDTH / CANVAS_HEIGHT;
 
 /**
  * Player fish dimensions at each tier (in pixels)
- * - Tier 1: Smallest, most vulnerable
- * - Tier 5: Largest, can eat most fish
+ * Scaled to match fish sizes - player must be larger than fish to eat them
+ * - Tier 1: Can eat tiny fish (16x12)
+ * - Tier 2: Can eat small fish (23x17)
+ * - Tier 3: Can eat medium fish (32x24)
+ * - Tier 4: Can eat large fish (45x34)
+ * - Tier 5: Can eat giant fish (64x48)
  */
 export const TIER_DIMENSIONS: Record<number, { width: number; height: number }> = {
-  1: { width: 16, height: 12 },
-  2: { width: 24, height: 18 },
-  3: { width: 32, height: 24 },
-  4: { width: 48, height: 36 },
-  5: { width: 64, height: 48 },
+  1: { width: 18, height: 14 },   // Slightly bigger than tiny (16x12)
+  2: { width: 26, height: 20 },   // Bigger than small (23x17)
+  3: { width: 36, height: 27 },   // Bigger than medium (32x24)
+  4: { width: 50, height: 38 },   // Bigger than large (45x34)
+  5: { width: 70, height: 53 },   // Bigger than giant (64x48)
 };
 
 /**
@@ -90,14 +94,15 @@ export type FishSizeKey = 'tiny' | 'small' | 'medium' | 'large' | 'giant';
 
 /**
  * Fish dimensions by size (in pixels)
- * Smaller fish are faster but worth fewer points
+ * Giant is 4x the size of tiny for very clear visual distinction
+ * Scale factor ~1.41x per level (1.41^4 ≈ 4)
  */
 export const FISH_DIMENSIONS: Record<FishSizeKey, { width: number; height: number }> = {
-  tiny: { width: 12, height: 9 },
-  small: { width: 20, height: 15 },
-  medium: { width: 28, height: 21 },
-  large: { width: 40, height: 30 },
-  giant: { width: 56, height: 42 },
+  tiny: { width: 16, height: 12 },      // Base size (1.0x)
+  small: { width: 23, height: 17 },     // ~1.4x
+  medium: { width: 32, height: 24 },    // ~2.0x
+  large: { width: 45, height: 34 },     // ~2.8x
+  giant: { width: 64, height: 48 },     // 4.0x
 };
 
 /**

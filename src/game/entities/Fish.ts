@@ -3,13 +3,14 @@
  */
 
 import { FishEntity, FishSize, Vector2D, BoundingBox, GameState } from '../types';
-import { 
-  FISH_DIMENSIONS, 
-  FISH_POINTS, 
+import {
+  FISH_DIMENSIONS,
+  FISH_POINTS,
   FISH_SPEEDS,
   CANVAS_WIDTH,
   CANVAS_HEIGHT
 } from '../constants';
+import { spriteLoader, FishSize as SpriteFishSize } from '../SpriteLoader';
 
 export class Fish implements FishEntity {
   public readonly id: string;
@@ -131,24 +132,36 @@ export class Fish implements FishEntity {
       ctx.translate(-renderX * 2, 0);
     }
 
-    // Draw fish as a colored rectangle (placeholder for sprite)
-    ctx.fillStyle = this.getFishColor();
-    ctx.fillRect(
-      renderX - this.width / 2,
-      renderY - this.height / 2,
-      this.width,
-      this.height
-    );
+    // Try to draw sprite, fallback to rectangle
+    const sprite = spriteLoader.getFishSprite(this.size as SpriteFishSize);
+    if (sprite && sprite.complete && sprite.naturalWidth > 0) {
+      ctx.drawImage(
+        sprite,
+        renderX - this.width / 2,
+        renderY - this.height / 2,
+        this.width,
+        this.height
+      );
+    } else {
+      // Fallback: Draw fish as a colored rectangle
+      ctx.fillStyle = this.getFishColor();
+      ctx.fillRect(
+        renderX - this.width / 2,
+        renderY - this.height / 2,
+        this.width,
+        this.height
+      );
 
-    // Draw size indicator for debugging
-    ctx.fillStyle = 'white';
-    ctx.font = '8px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(
-      this.size.charAt(0).toUpperCase(),
-      renderX,
-      renderY + 2
-    );
+      // Draw size indicator for debugging
+      ctx.fillStyle = 'white';
+      ctx.font = '8px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(
+        this.size.charAt(0).toUpperCase(),
+        renderX,
+        renderY + 2
+      );
+    }
 
     ctx.restore();
   }

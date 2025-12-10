@@ -3,11 +3,12 @@
  */
 
 import { CrabEntity, Vector2D, BoundingBox, GameState } from '../types';
-import { 
+import {
   CRAB_CONFIG,
   CANVAS_WIDTH,
   CANVAS_HEIGHT
 } from '../constants';
+import { spriteLoader } from '../SpriteLoader';
 
 export class Crab implements CrabEntity {
   public readonly id: string;
@@ -80,48 +81,60 @@ export class Crab implements CrabEntity {
       ctx.translate(-renderX * 2, 0);
     }
 
-    // Draw crab body (reddish-brown)
-    ctx.fillStyle = '#8D4004';
-    ctx.fillRect(
-      renderX - this.width / 2,
-      renderY - this.height / 2,
-      this.width,
-      this.height
-    );
+    // Try to draw sprite, fallback to rectangle
+    const sprite = spriteLoader.getHazardSprite('crab');
+    if (sprite && sprite.complete && sprite.naturalWidth > 0) {
+      ctx.drawImage(
+        sprite,
+        renderX - this.width / 2,
+        renderY - this.height / 2,
+        this.width,
+        this.height
+      );
+    } else {
+      // Fallback: Draw crab body (reddish-brown)
+      ctx.fillStyle = '#8D4004';
+      ctx.fillRect(
+        renderX - this.width / 2,
+        renderY - this.height / 2,
+        this.width,
+        this.height
+      );
 
-    // Draw crab claws (darker red)
-    ctx.fillStyle = '#5D2C02';
-    const clawSize = 4;
-    // Left claw
-    ctx.fillRect(
-      renderX - this.width / 2 - clawSize,
-      renderY - this.height / 4,
-      clawSize,
-      this.height / 2
-    );
-    // Right claw
-    ctx.fillRect(
-      renderX + this.width / 2,
-      renderY - this.height / 4,
-      clawSize,
-      this.height / 2
-    );
+      // Draw crab claws (darker red)
+      ctx.fillStyle = '#5D2C02';
+      const clawSize = 4;
+      // Left claw
+      ctx.fillRect(
+        renderX - this.width / 2 - clawSize,
+        renderY - this.height / 4,
+        clawSize,
+        this.height / 2
+      );
+      // Right claw
+      ctx.fillRect(
+        renderX + this.width / 2,
+        renderY - this.height / 4,
+        clawSize,
+        this.height / 2
+      );
 
-    // Draw eyes (white dots)
-    ctx.fillStyle = 'white';
-    const eyeSize = 2;
-    ctx.fillRect(
-      renderX - this.width / 4,
-      renderY - this.height / 3,
-      eyeSize,
-      eyeSize
-    );
-    ctx.fillRect(
-      renderX + this.width / 4 - eyeSize,
-      renderY - this.height / 3,
-      eyeSize,
-      eyeSize
-    );
+      // Draw eyes (white dots)
+      ctx.fillStyle = 'white';
+      const eyeSize = 2;
+      ctx.fillRect(
+        renderX - this.width / 4,
+        renderY - this.height / 3,
+        eyeSize,
+        eyeSize
+      );
+      ctx.fillRect(
+        renderX + this.width / 4 - eyeSize,
+        renderY - this.height / 3,
+        eyeSize,
+        eyeSize
+      );
+    }
 
     ctx.restore();
   }

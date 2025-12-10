@@ -3,11 +3,12 @@
  */
 
 import { SharkEntity, SharkState, Vector2D, BoundingBox, GameState } from '../types';
-import { 
+import {
   SHARK_CONFIG,
   CANVAS_WIDTH,
   CANVAS_HEIGHT
 } from '../constants';
+import { spriteLoader } from '../SpriteLoader';
 
 export class Shark implements SharkEntity {
   public readonly id: string;
@@ -239,39 +240,52 @@ export class Shark implements SharkEntity {
       ctx.translate(-renderX * 2, 0);
     }
 
-    // Draw shark body (dark gray)
-    ctx.fillStyle = '#424242';
-    ctx.fillRect(
-      renderX - this.width / 2,
-      renderY - this.height / 2,
-      this.width,
-      this.height
-    );
+    // Try to draw sprite, fallback to rectangle
+    const sprite = spriteLoader.getHazardSprite('shark');
+    if (sprite && sprite.complete && sprite.naturalWidth > 0) {
+      ctx.drawImage(
+        sprite,
+        renderX - this.width / 2,
+        renderY - this.height / 2,
+        this.width,
+        this.height
+      );
+    } else {
+      // Fallback: Draw shark body (dark gray)
+      ctx.fillStyle = '#424242';
+      ctx.fillRect(
+        renderX - this.width / 2,
+        renderY - this.height / 2,
+        this.width,
+        this.height
+      );
 
-    // Draw tail section (lighter gray for visual distinction)
-    const tailHitbox = this.getTailHitbox();
-    ctx.fillStyle = '#757575';
-    ctx.fillRect(
-      this.facingLeft ? renderX + this.width / 2 - tailHitbox.width : renderX - this.width / 2,
-      renderY - this.height / 2,
-      tailHitbox.width,
-      this.height
-    );
+      // Draw tail section (lighter gray for visual distinction)
+      const tailHitbox = this.getTailHitbox();
+      ctx.fillStyle = '#757575';
+      ctx.fillRect(
+        this.facingLeft ? renderX + this.width / 2 - tailHitbox.width : renderX - this.width / 2,
+        renderY - this.height / 2,
+        tailHitbox.width,
+        this.height
+      );
 
-    // Draw state indicator for debugging
-    ctx.fillStyle = 'white';
-    ctx.font = '10px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(
-      this.state.charAt(0).toUpperCase(),
-      renderX,
-      renderY - this.height / 2 + 12
-    );
+      // Draw state indicator for debugging
+      ctx.fillStyle = 'white';
+      ctx.font = '10px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(
+        this.state.charAt(0).toUpperCase(),
+        renderX,
+        renderY - this.height / 2 + 12
+      );
+    }
 
     // Draw dive timer if in patrol and tracking player
     if (this.state === 'patrol' && this.diveTimer > 0) {
       ctx.fillStyle = 'red';
       ctx.font = '8px Arial';
+      ctx.textAlign = 'center';
       ctx.fillText(
         `${this.diveTimer.toFixed(1)}s`,
         renderX,

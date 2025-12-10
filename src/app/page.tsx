@@ -10,33 +10,34 @@
  */
 
 import React, { useRef, useEffect, useCallback, useState } from 'react';
-import { 
-  GameCanvas, 
-  GameCanvasHandle, 
-  HUD, 
-  TitleScreen, 
-  PauseScreen, 
+import {
+  GameCanvas,
+  GameCanvasHandle,
+  HUD,
+  TitleScreen,
+  PauseScreen,
   GameOverScreen,
-  AudioControls 
+  AudioControls
 } from '@/components';
-import { 
-  useGameLoop, 
-  useGameControls, 
-  useInput, 
-  useAudio, 
-  useGameAudioEvents, 
-  useSharkAudioEvents 
+import {
+  useGameLoop,
+  useGameControls,
+  useInput,
+  useAudio,
+  useGameAudioEvents,
+  useSharkAudioEvents
 } from '@/hooks';
-import { 
-  Renderer, 
-  CollisionSystem, 
-  SpawnSystem, 
+import {
+  Renderer,
+  CollisionSystem,
+  SpawnSystem,
   DifficultySystem
 } from '@/game';
 import { Player, Shark, EntityManager } from '@/game/entities';
 import type { HighScoreEntry, CollisionResult, GameState, FishEntity } from '@/game/types';
 import { HIGH_SCORE_STORAGE_KEY, SEAHORSE_CONFIG } from '@/game/constants';
 import { gameLogger } from '@/lib/gameLogger';
+import { spriteLoader } from '@/game/SpriteLoader';
 
 /**
  * Load high scores from localStorage
@@ -98,6 +99,13 @@ export default function GamePage() {
   
   // Audio initialization state
   const [audioInitialized, setAudioInitialized] = useState(false);
+
+  // Load sprites on mount
+  useEffect(() => {
+    spriteLoader.loadAll().catch((err) => {
+      console.warn('Failed to load some sprites:', err);
+    });
+  }, []);
 
   // Initialize hooks
   const input = useInput();

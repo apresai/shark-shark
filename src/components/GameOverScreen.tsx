@@ -12,6 +12,92 @@
 
 import React from 'react';
 import type { HighScoreEntry } from '../game/types';
+import type { WindowSize } from '../hooks/useWindowSize';
+import { useWindowSize } from '../hooks/useWindowSize';
+
+/**
+ * Responsive styles interface for GameOverScreen elements
+ */
+export interface ResponsiveStyles {
+  title: React.CSSProperties;
+  finalScoreValue: React.CSSProperties;
+  statLabel: React.CSSProperties;
+  statValue: React.CSSProperties;
+  restartButton: React.CSSProperties;
+  container: React.CSSProperties;
+  statsSection: React.CSSProperties;
+  highScoresSection: React.CSSProperties;
+}
+
+/**
+ * Calculate responsive styles based on viewport dimensions
+ * 
+ * Returns desktop styles when width > 768px
+ * Returns mobile styles when width <= 768px
+ * 
+ * Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 4.1, 4.3
+ */
+export function getResponsiveStyles(windowSize: WindowSize): ResponsiveStyles {
+  const { isMobile } = windowSize;
+
+  if (isMobile) {
+    // Mobile styles (width <= 768px)
+    return {
+      title: {
+        fontSize: '32px',
+      },
+      finalScoreValue: {
+        fontSize: '28px',
+      },
+      statLabel: {
+        fontSize: '12px',
+      },
+      statValue: {
+        fontSize: '20px',
+      },
+      restartButton: {
+        padding: '16px 40px',
+        minWidth: '44px',
+        minHeight: '44px',
+      },
+      container: {
+        padding: '20px',
+        gap: '16px',
+      },
+      statsSection: {
+        gap: '30px',
+      },
+      highScoresSection: {},
+    };
+  }
+
+  // Desktop styles (width > 768px)
+  return {
+    title: {
+      fontSize: '56px',
+    },
+    finalScoreValue: {
+      fontSize: '48px',
+    },
+    statLabel: {
+      fontSize: '16px',
+    },
+    statValue: {
+      fontSize: '32px',
+    },
+    restartButton: {
+      padding: '24px 60px',
+    },
+    container: {
+      padding: '40px',
+      gap: '24px',
+    },
+    statsSection: {
+      gap: '60px',
+    },
+    highScoresSection: {},
+  };
+}
 
 export interface GameOverScreenProps {
   /** Final score achieved */
@@ -55,11 +141,14 @@ export function GameOverScreen({
   fishEaten, 
   onRestart 
 }: GameOverScreenProps) {
+  const windowSize = useWindowSize();
+  const responsiveStyles = getResponsiveStyles(windowSize);
+
   return (
     <div style={styles.overlay}>
-      <div style={styles.container}>
+      <div style={{ ...styles.container, ...responsiveStyles.container }}>
         {/* Game Over Title */}
-        <h1 style={styles.title}>GAME OVER</h1>
+        <h1 style={{ ...styles.title, ...responsiveStyles.title }}>GAME OVER</h1>
         
         {/* New High Score Banner */}
         {isNewHighScore && (
@@ -71,24 +160,24 @@ export function GameOverScreen({
         {/* Final Score */}
         <div style={styles.finalScoreSection}>
           <span style={styles.label}>FINAL SCORE</span>
-          <span style={styles.finalScoreValue}>{formatScore(finalScore)}</span>
+          <span style={{ ...styles.finalScoreValue, ...responsiveStyles.finalScoreValue }}>{formatScore(finalScore)}</span>
         </div>
         
         {/* Stats */}
-        <div style={styles.statsSection}>
+        <div style={{ ...styles.statsSection, ...responsiveStyles.statsSection }}>
           <div style={styles.stat}>
-            <span style={styles.statLabel}>TIER REACHED</span>
-            <span style={styles.statValue}>{finalTier}</span>
+            <span style={{ ...styles.statLabel, ...responsiveStyles.statLabel }}>TIER REACHED</span>
+            <span style={{ ...styles.statValue, ...responsiveStyles.statValue }}>{finalTier}</span>
           </div>
           <div style={styles.stat}>
-            <span style={styles.statLabel}>FISH EATEN</span>
-            <span style={styles.statValue}>{fishEaten}</span>
+            <span style={{ ...styles.statLabel, ...responsiveStyles.statLabel }}>FISH EATEN</span>
+            <span style={{ ...styles.statValue, ...responsiveStyles.statValue }}>{fishEaten}</span>
           </div>
         </div>
         
         {/* Restart Button */}
         <button 
-          style={styles.restartButton}
+          style={{ ...styles.restartButton, ...responsiveStyles.restartButton }}
           onClick={onRestart}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = '#cc5533';
@@ -104,7 +193,7 @@ export function GameOverScreen({
         
         {/* High Scores */}
         {highScores.length > 0 && (
-          <div style={styles.highScoresSection}>
+          <div style={{ ...styles.highScoresSection, ...responsiveStyles.highScoresSection }}>
             <h2 style={styles.highScoresTitle}>HIGH SCORES</h2>
             <div style={styles.highScoresList}>
               {highScores.slice(0, 5).map((entry, index) => (
@@ -222,6 +311,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginTop: '24px',
     width: '100%',
     maxWidth: '500px',
+    maxHeight: '30vh',
   },
   highScoresTitle: {
     fontSize: '24px',
@@ -233,6 +323,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     gap: '10px',
+    overflowY: 'auto',
   },
   highScoreEntry: {
     display: 'flex',

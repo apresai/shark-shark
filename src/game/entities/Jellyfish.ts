@@ -3,11 +3,12 @@
  */
 
 import { JellyfishEntity, Vector2D, BoundingBox, GameState } from '../types';
-import { 
+import {
   JELLYFISH_CONFIG,
   CANVAS_WIDTH,
   CANVAS_HEIGHT
 } from '../constants';
+import { spriteLoader } from '../SpriteLoader';
 
 export class Jellyfish implements JellyfishEntity {
   public readonly id: string;
@@ -66,36 +67,48 @@ export class Jellyfish implements JellyfishEntity {
 
     ctx.save();
 
-    // Draw jellyfish bell (translucent purple)
-    ctx.fillStyle = 'rgba(147, 112, 219, 0.8)';
-    ctx.beginPath();
-    ctx.ellipse(
-      renderX,
-      renderY - this.height / 4,
-      this.width / 2,
-      this.height / 3,
-      0,
-      0,
-      2 * Math.PI
-    );
-    ctx.fill();
-
-    // Draw jellyfish tentacles (darker purple lines)
-    ctx.strokeStyle = 'rgba(102, 51, 153, 0.9)';
-    ctx.lineWidth = 2;
-    
-    const tentacleCount = 4;
-    for (let i = 0; i < tentacleCount; i++) {
-      const angle = (i / tentacleCount) * Math.PI - Math.PI / 2;
-      const startX = renderX + Math.cos(angle) * (this.width / 3);
-      const startY = renderY;
-      const endX = startX + Math.cos(angle + Math.PI / 2) * (this.height / 2);
-      const endY = renderY + this.height / 2;
-      
+    // Try to draw sprite, fallback to shapes
+    const sprite = spriteLoader.getHazardSprite('jellyfish');
+    if (sprite && sprite.complete && sprite.naturalWidth > 0) {
+      ctx.drawImage(
+        sprite,
+        renderX - this.width / 2,
+        renderY - this.height / 2,
+        this.width,
+        this.height
+      );
+    } else {
+      // Fallback: Draw jellyfish bell (translucent purple)
+      ctx.fillStyle = 'rgba(147, 112, 219, 0.8)';
       ctx.beginPath();
-      ctx.moveTo(startX, startY);
-      ctx.lineTo(endX, endY);
-      ctx.stroke();
+      ctx.ellipse(
+        renderX,
+        renderY - this.height / 4,
+        this.width / 2,
+        this.height / 3,
+        0,
+        0,
+        2 * Math.PI
+      );
+      ctx.fill();
+
+      // Draw jellyfish tentacles (darker purple lines)
+      ctx.strokeStyle = 'rgba(102, 51, 153, 0.9)';
+      ctx.lineWidth = 2;
+
+      const tentacleCount = 4;
+      for (let i = 0; i < tentacleCount; i++) {
+        const angle = (i / tentacleCount) * Math.PI - Math.PI / 2;
+        const startX = renderX + Math.cos(angle) * (this.width / 3);
+        const startY = renderY;
+        const endX = startX + Math.cos(angle + Math.PI / 2) * (this.height / 2);
+        const endY = renderY + this.height / 2;
+
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+      }
     }
 
     ctx.restore();

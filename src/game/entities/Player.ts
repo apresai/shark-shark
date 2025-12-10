@@ -3,12 +3,12 @@
  */
 
 import { Entity, PlayerState, Vector2D, BoundingBox, GameState } from '../types';
-import { 
-  TIER_DIMENSIONS, 
-  TIER_THRESHOLDS, 
-  PLAYER_BASE_SPEED, 
-  PLAYER_TIER_SPEED_BONUS, 
-  PLAYER_FRICTION, 
+import {
+  TIER_DIMENSIONS,
+  TIER_THRESHOLDS,
+  PLAYER_BASE_SPEED,
+  PLAYER_TIER_SPEED_BONUS,
+  PLAYER_FRICTION,
   PLAYER_ACCELERATION,
   CANVAS_WIDTH,
   CANVAS_HEIGHT,
@@ -17,6 +17,7 @@ import {
   INVULNERABILITY_DURATION
 } from '../constants';
 import { clampMagnitude, lerp } from '../../lib/math';
+import { spriteLoader, PlayerTier } from '../SpriteLoader';
 
 export class Player implements Entity {
   public readonly id: string;
@@ -226,24 +227,36 @@ export class Player implements Entity {
       ctx.translate(-renderX * 2, 0);
     }
 
-    // Draw player as a colored rectangle (placeholder for sprite)
-    ctx.fillStyle = this.getPlayerColor();
-    ctx.fillRect(
-      renderX - this.width / 2,
-      renderY - this.height / 2,
-      this.width,
-      this.height
-    );
+    // Try to draw sprite, fallback to rectangle
+    const sprite = spriteLoader.getPlayerSprite(this.tier as PlayerTier);
+    if (sprite && sprite.complete && sprite.naturalWidth > 0) {
+      ctx.drawImage(
+        sprite,
+        renderX - this.width / 2,
+        renderY - this.height / 2,
+        this.width,
+        this.height
+      );
+    } else {
+      // Fallback: Draw player as a colored rectangle
+      ctx.fillStyle = this.getPlayerColor();
+      ctx.fillRect(
+        renderX - this.width / 2,
+        renderY - this.height / 2,
+        this.width,
+        this.height
+      );
 
-    // Draw tier indicator (small number in corner)
-    ctx.fillStyle = 'white';
-    ctx.font = '10px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(
-      this.tier.toString(),
-      renderX,
-      renderY - this.height / 2 + 8
-    );
+      // Draw tier indicator (small number in corner)
+      ctx.fillStyle = 'white';
+      ctx.font = '10px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(
+        this.tier.toString(),
+        renderX,
+        renderY - this.height / 2 + 8
+      );
+    }
 
     ctx.restore();
   }
