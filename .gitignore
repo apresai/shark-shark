@@ -30,6 +30,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# game logs
+/game-logs/
+
 # env files (can opt-in for committing if needed)
 .env*
 
@@ -39,3 +42,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Editor/IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Optional caches
+.npm
+.eslintcache
+.turbo
