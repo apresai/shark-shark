@@ -33,6 +33,9 @@ yarn-error.log*
 # game logs
 /game-logs/
 
+# music/sound assets (large files)
+/music/
+
 # env files (can opt-in for committing if needed)
 .env*
 
@@ -46,6 +49,7 @@ next-env.d.ts
 # Editor/IDE
 .idea/
 .vscode/
+.kiro/
 *.swp
 *.swo
 *~
@@ -54,6 +58,10 @@ next-env.d.ts
 .npm
 .eslintcache
 .turbo
+.swc/
+
+# Claude Code
+.claude/
 
 # CDK infrastructure
 infra/node_modules/
