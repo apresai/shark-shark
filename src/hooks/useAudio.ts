@@ -11,7 +11,7 @@
  */
 
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { AudioManager } from '../game/engine/AudioManager';
+import { AudioManager, MusicMode } from '../game/engine/AudioManager';
 import type { GameState, SoundEffect, AudioChannel } from '../game/types';
 
 export interface UseAudioOptions {
@@ -38,6 +38,8 @@ export interface UseAudioReturn {
   setMuted: (muted: boolean) => void;
   /** Set volume for a channel */
   setVolume: (channel: AudioChannel, volume: number) => void;
+  /** Set music mode (normal or danger) */
+  setMusicMode: (mode: MusicMode) => void;
   /** Current muted state */
   muted: boolean;
   /** Current music volume */
@@ -48,6 +50,8 @@ export interface UseAudioReturn {
   isInitialized: boolean;
   /** Whether music is playing */
   isMusicPlaying: boolean;
+  /** Current music mode */
+  musicMode: MusicMode;
   /** Initialize audio (call after user interaction) */
   initialize: () => Promise<void>;
 }
@@ -72,6 +76,7 @@ export function useAudio(options: UseAudioOptions = {}): UseAudioReturn {
   const [sfxVolume, setSfxVolumeState] = useState(initialSfxVolume);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [musicMode, setMusicModeState] = useState<MusicMode>('normal');
 
   // Initialize AudioManager on mount
   useEffect(() => {
@@ -140,6 +145,12 @@ export function useAudio(options: UseAudioOptions = {}): UseAudioReturn {
     }
   }, []);
 
+  // Set music mode (normal or danger)
+  const setMusicMode = useCallback((mode: MusicMode) => {
+    audioManagerRef.current?.setMusicMode(mode);
+    setMusicModeState(mode);
+  }, []);
+
   return {
     playSound,
     playMusic,
@@ -147,11 +158,13 @@ export function useAudio(options: UseAudioOptions = {}): UseAudioReturn {
     toggleMute,
     setMuted,
     setVolume,
+    setMusicMode,
     muted,
     musicVolume,
     sfxVolume,
     isInitialized,
     isMusicPlaying,
+    musicMode,
     initialize,
   };
 }
@@ -240,36 +253,50 @@ export function useGameAudioEvents(
 }
 
 /**
- * Hook to play shark warning sound when shark dives
+ * Hook to manage shark audio: play warning sound on dive and switch music mode
  * Requirement 12.4
  */
 export function useSharkAudioEvents(
   entities: GameState['entities'],
   audio: UseAudioReturn
 ): void {
-  const { playSound } = audio;
-  
-  // Track shark states
+  const { playSound, setMusicMode } = audio;
+
+  // Track shark states and presence
   const sharkStatesRef = useRef<Map<string, string>>(new Map());
+  const hadSharkRef = useRef(false);
 
   useEffect(() => {
     const currentSharkStates = new Map<string, string>();
-    
+    let hasActiveShark = false;
+
     for (const entity of entities) {
-      if (entity.type === 'shark') {
+      if (entity.type === 'shark' && entity.active) {
+        hasActiveShark = true;
+
         // Access state property from shark entity
         const sharkEntity = entity as unknown as { id: string; state: string };
         const prevState = sharkStatesRef.current.get(sharkEntity.id);
-        
+
         // Requirement 12.4: Play shark warning when shark enters dive state
         if (prevState !== 'dive' && sharkEntity.state === 'dive') {
           playSound('shark');
         }
-        
+
         currentSharkStates.set(sharkEntity.id, sharkEntity.state);
       }
     }
-    
+
+    // Switch music mode based on shark presence
+    if (hasActiveShark && !hadSharkRef.current) {
+      // Shark just appeared - switch to danger music
+      setMusicMode('danger');
+    } else if (!hasActiveShark && hadSharkRef.current) {
+      // Shark just left - switch back to normal music
+      setMusicMode('normal');
+    }
+
+    hadSharkRef.current = hasActiveShark;
     sharkStatesRef.current = currentSharkStates;
-  }, [entities, playSound]);
+  }, [entities, playSound, setMusicMode]);
 }

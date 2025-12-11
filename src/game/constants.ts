@@ -150,9 +150,9 @@ export const SHARK_CONFIG = {
   /** Shark body height in pixels */
   height: 48,
   /** Normal patrol speed (pixels/second) */
-  baseSpeed: 120,
+  baseSpeed: 60,
   /** Maximum speed when diving (pixels/second) */
-  maxSpeed: 200,
+  maxSpeed: 100,
   /** Percentage of body that is bitable tail (0.1 = 10%) */
   tailRatio: 0.1,
   /** Percentage of body that kills player (0.9 = 90%) */
@@ -164,9 +164,9 @@ export const SHARK_CONFIG = {
   /** Upper portion of screen where shark patrols (0.6 = top 60%) */
   patrolYRange: 0.6,
   /** Speed when diving toward player (pixels/second) */
-  diveSpeed: 180,
+  diveSpeed: 90,
   /** Speed when returning to patrol area (pixels/second) */
-  returnSpeed: 100,
+  returnSpeed: 50,
 };
 
 /**

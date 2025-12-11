@@ -8,4 +8,4 @@ export type { GameLoopCallbacks, UpdateCallback, RenderCallback } from './GameLo
 export { InputManager } from './InputManager';
 
 export { AudioManager } from './AudioManager';
-export type { AudioManagerConfig } from './AudioManager';
+export type { AudioManagerConfig, MusicMode } from './AudioManager';

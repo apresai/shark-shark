@@ -8,21 +8,29 @@ import { SoundEffect, AudioChannel } from '../types';
 
 // Sound file paths (relative to public directory)
 const SOUND_PATHS: Record<SoundEffect, string> = {
-  eat: '/sounds/eat.mp3',
-  death: '/sounds/death.mp3',
-  levelup: '/sounds/levelup.mp3',
-  shark: '/sounds/shark.mp3',
-  bonus: '/sounds/bonus.mp3',
-  extralife: '/sounds/extralife.mp3',
+  eat: '/sounds/bonus.wav',      // Reuse bonus sound for eating
+  death: '/sounds/death.wav',
+  levelup: '/sounds/bonus.wav',  // Reuse bonus sound for level up
+  shark: '/sounds/shark.wav',
+  bonus: '/sounds/bonus.wav',
+  extralife: '/sounds/bonus.wav', // Reuse bonus sound for extra life
 };
 
-const MUSIC_PATH = '/sounds/music.mp3';
+// Music tracks - normal gameplay and danger mode
+const MUSIC_TRACKS = {
+  normal: ['/sounds/music.wav', '/sounds/music2.wav'],
+  danger: '/sounds/danger.wav',
+};
+
+const MUSIC_PATH = '/sounds/music.wav';
 
 export interface AudioManagerConfig {
   musicVolume?: number;
   sfxVolume?: number;
   muted?: boolean;
 }
+
+export type MusicMode = 'normal' | 'danger';
 
 export class AudioManager {
   private audioContext: AudioContext | null = null;
@@ -32,7 +40,13 @@ export class AudioManager {
   private musicGainNode: GainNode | null = null;
   private sfxGainNode: GainNode | null = null;
   private masterGainNode: GainNode | null = null;
-  
+
+  // Music track management
+  private normalMusicBuffers: AudioBuffer[] = [];
+  private dangerMusicBuffer: AudioBuffer | null = null;
+  private currentTrackIndex: number = 0;
+  private currentMusicMode: MusicMode = 'normal';
+
   private musicVolume: number = 0.5;
   private sfxVolume: number = 0.7;
   private muted: boolean = false;
@@ -99,14 +113,30 @@ export class AudioManager {
       );
     }
 
-    // Load music
+    // Load normal music tracks
+    for (const trackPath of MUSIC_TRACKS.normal) {
+      loadPromises.push(
+        this.loadSound(trackPath).then(buffer => {
+          if (buffer) {
+            this.normalMusicBuffers.push(buffer);
+          }
+        })
+      );
+    }
+
+    // Load danger music
     loadPromises.push(
-      this.loadSound(MUSIC_PATH).then(buffer => {
-        this.musicBuffer = buffer;
+      this.loadSound(MUSIC_TRACKS.danger).then(buffer => {
+        this.dangerMusicBuffer = buffer;
       })
     );
 
     await Promise.all(loadPromises);
+
+    // Set default music buffer to first normal track
+    if (this.normalMusicBuffers.length > 0) {
+      this.musicBuffer = this.normalMusicBuffers[0];
+    }
   }
 
   /**
@@ -197,6 +227,70 @@ export class AudioManager {
   }
 
   /**
+   * Set music mode (normal gameplay or danger/shark nearby)
+   * Automatically switches the current track
+   */
+  setMusicMode(mode: MusicMode): void {
+    if (this.currentMusicMode === mode) return;
+
+    this.currentMusicMode = mode;
+
+    if (mode === 'danger' && this.dangerMusicBuffer) {
+      this.musicBuffer = this.dangerMusicBuffer;
+    } else if (mode === 'normal' && this.normalMusicBuffers.length > 0) {
+      this.musicBuffer = this.normalMusicBuffers[this.currentTrackIndex];
+    }
+
+    // If music was playing, restart with new track
+    if (this.musicPlaying) {
+      this.stopMusic();
+      this.playMusic();
+    }
+  }
+
+  /**
+   * Get current music mode
+   */
+  getMusicMode(): MusicMode {
+    return this.currentMusicMode;
+  }
+
+  /**
+   * Cycle to the next normal music track
+   * Only affects normal mode, not danger mode
+   */
+  nextTrack(): void {
+    if (this.normalMusicBuffers.length <= 1) return;
+
+    this.currentTrackIndex = (this.currentTrackIndex + 1) % this.normalMusicBuffers.length;
+
+    // Update buffer if in normal mode
+    if (this.currentMusicMode === 'normal') {
+      this.musicBuffer = this.normalMusicBuffers[this.currentTrackIndex];
+
+      // Restart music if playing
+      if (this.musicPlaying) {
+        this.stopMusic();
+        this.playMusic();
+      }
+    }
+  }
+
+  /**
+   * Get current track index (for normal mode)
+   */
+  getCurrentTrackIndex(): number {
+    return this.currentTrackIndex;
+  }
+
+  /**
+   * Get total number of normal music tracks
+   */
+  getTrackCount(): number {
+    return this.normalMusicBuffers.length;
+  }
+
+  /**
    * Set muted state for all audio
    * Requirements: 12.5
    */
@@ -269,17 +363,21 @@ export class AudioManager {
    */
   destroy(): void {
     this.stopMusic();
-    
+
     if (this.audioContext) {
       this.audioContext.close();
       this.audioContext = null;
     }
-    
+
     this.soundBuffers.clear();
     this.musicBuffer = null;
+    this.normalMusicBuffers = [];
+    this.dangerMusicBuffer = null;
     this.masterGainNode = null;
     this.musicGainNode = null;
     this.sfxGainNode = null;
     this.initialized = false;
+    this.currentTrackIndex = 0;
+    this.currentMusicMode = 'normal';
   }
 }
