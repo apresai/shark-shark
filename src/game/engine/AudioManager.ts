@@ -8,21 +8,19 @@ import { SoundEffect, AudioChannel } from '../types';
 
 // Sound file paths (relative to public directory)
 const SOUND_PATHS: Record<SoundEffect, string> = {
-  eat: '/sounds/bonus.wav',      // Reuse bonus sound for eating
-  death: '/sounds/death.wav',
-  levelup: '/sounds/bonus.wav',  // Reuse bonus sound for level up
-  shark: '/sounds/shark.wav',
-  bonus: '/sounds/bonus.wav',
-  extralife: '/sounds/bonus.wav', // Reuse bonus sound for extra life
+  eat: '/sounds/bonus.mp3',      // Reuse bonus sound for eating
+  death: '/sounds/death.mp3',
+  levelup: '/sounds/bonus.mp3',  // Reuse bonus sound for level up
+  shark: '/sounds/shark.mp3',
+  bonus: '/sounds/bonus.mp3',
+  extralife: '/sounds/bonus.mp3', // Reuse bonus sound for extra life
 };
 
 // Music tracks - normal gameplay and danger mode
 const MUSIC_TRACKS = {
-  normal: ['/sounds/music.wav', '/sounds/music2.wav'],
-  danger: '/sounds/danger.wav',
+  normal: ['/sounds/music.mp3', '/sounds/music2.mp3'],
+  danger: '/sounds/danger.mp3',
 };
-
-const MUSIC_PATH = '/sounds/music.wav';
 
 export interface AudioManagerConfig {
   musicVolume?: number;
