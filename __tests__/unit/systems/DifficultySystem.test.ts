@@ -31,9 +31,9 @@ describe('DifficultySystem', () => {
       expect(difficulty.jellyfishCount).toBe(3);
     });
 
-    it('should enable shark after 20 seconds', () => {
-      const difficultyBefore = DifficultySystem.calculateDifficulty(19, 1);
-      const difficultyAfter = DifficultySystem.calculateDifficulty(21, 1);
+    it('should enable shark after sharkEnableTime', () => {
+      const difficultyBefore = DifficultySystem.calculateDifficulty(DIFFICULTY_CONFIG.sharkEnableTime - 1, 1);
+      const difficultyAfter = DifficultySystem.calculateDifficulty(DIFFICULTY_CONFIG.sharkEnableTime + 1, 1);
       
       expect(difficultyBefore.sharkEnabled).toBe(false);
       expect(difficultyAfter.sharkEnabled).toBe(true);
@@ -97,8 +97,8 @@ describe('DifficultySystem', () => {
       expect(status.jellyfishEnabled).toBe(false);
     });
 
-    it('should enable shark after 20 seconds', () => {
-      const status = DifficultySystem.getHazardEnableStatus(21, 1);
+    it('should enable shark after sharkEnableTime', () => {
+      const status = DifficultySystem.getHazardEnableStatus(DIFFICULTY_CONFIG.sharkEnableTime + 1, 1);
       
       expect(status.sharkEnabled).toBe(true);
     });

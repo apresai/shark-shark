@@ -1,9 +1,11 @@
 /**
  * InputManager - Handles keyboard and touch input for the game
  * Provides normalized input state and vector calculations
+ * Supports tap-to-move for mobile devices
  */
 
 import { InputState, InputVector, InputSource } from '../types';
+import { CANVAS_WIDTH, CANVAS_HEIGHT } from '../constants';
 
 export class InputManager {
   private keyState: Set<string> = new Set();
@@ -18,6 +20,11 @@ export class InputManager {
   private isActive = false;
   private touchVector: InputVector = { x: 0, y: 0 };
   private touchDeadzone = 0.1; // Minimum input threshold
+  
+  // Tap-to-move state
+  private targetPosition: { x: number; y: number } | null = null;
+  private playerPosition: { x: number; y: number } = { x: 0, y: 0 };
+  private arrivalThreshold = 15; // Distance at which we consider arrived
 
   constructor() {
     this.handleKeyDown = this.handleKeyDown.bind(this);
@@ -177,10 +184,63 @@ export class InputManager {
   }
 
   /**
-   * Update method (for future use)
+   * Update method - processes tap-to-move logic
    */
   public update(): void {
-    // Currently no per-frame updates needed
-    // This method is available for future enhancements
+    // Update touch vector based on tap-to-move target
+    if (this.targetPosition && this.inputSource === 'touch') {
+      const dx = this.targetPosition.x - this.playerPosition.x;
+      const dy = this.targetPosition.y - this.playerPosition.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      // Check if we've arrived at target
+      if (distance < this.arrivalThreshold) {
+        this.targetPosition = null;
+        this.touchVector = { x: 0, y: 0 };
+      } else {
+        // Normalize direction vector
+        this.touchVector = {
+          x: dx / distance,
+          y: dy / distance
+        };
+      }
+    }
+  }
+
+  /**
+   * Set tap-to-move target position (in game coordinates)
+   */
+  public setTapTarget(x: number, y: number): void {
+    this.targetPosition = { x, y };
+    this.inputSource = 'touch';
+  }
+
+  /**
+   * Update player position (called each frame for tap-to-move calculations)
+   */
+  public setPlayerPosition(x: number, y: number): void {
+    this.playerPosition = { x, y };
+  }
+
+  /**
+   * Clear tap-to-move target
+   */
+  public clearTapTarget(): void {
+    this.targetPosition = null;
+    this.touchVector = { x: 0, y: 0 };
+  }
+
+  /**
+   * Check if tap-to-move is active
+   */
+  public hasTapTarget(): boolean {
+    return this.targetPosition !== null;
+  }
+
+  /**
+   * Get current tap target (for visual feedback)
+   */
+  public getTapTarget(): { x: number; y: number } | null {
+    return this.targetPosition ? { ...this.targetPosition } : null;
   }
 }

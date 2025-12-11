@@ -17,6 +17,8 @@ export interface GameCanvasProps {
   onCanvasReady?: (ctx: CanvasRenderingContext2D) => void;
   /** Callback when canvas resizes */
   onResize?: (width: number, height: number, scale: number) => void;
+  /** Callback when user taps on canvas (game coordinates) */
+  onTap?: (x: number, y: number) => void;
   /** Additional CSS class names */
   className?: string;
 }
@@ -53,7 +55,7 @@ function calculateScaledDimensions(
 
 
 export const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
-  function GameCanvas({ onCanvasReady, onResize, className = '' }, ref) {
+  function GameCanvas({ onCanvasReady, onResize, onTap, className = '' }, ref) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -111,6 +113,34 @@ export const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
     }, [onCanvasReady]);
 
     /**
+     * Convert screen coordinates to game coordinates
+     */
+    const screenToGameCoords = useCallback((clientX: number, clientY: number): { x: number; y: number } | null => {
+      const canvas = canvasRef.current;
+      if (!canvas) return null;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = ((clientX - rect.left) / rect.width) * CANVAS_WIDTH;
+      const y = ((clientY - rect.top) / rect.height) * CANVAS_HEIGHT;
+
+      // Clamp to canvas bounds
+      return {
+        x: Math.max(0, Math.min(CANVAS_WIDTH, x)),
+        y: Math.max(0, Math.min(CANVAS_HEIGHT, y))
+      };
+    }, []);
+
+    /**
+     * Handle touch/click events for tap-to-move
+     */
+    const handleTap = useCallback((clientX: number, clientY: number) => {
+      const coords = screenToGameCoords(clientX, clientY);
+      if (coords && onTap) {
+        onTap(coords.x, coords.y);
+      }
+    }, [screenToGameCoords, onTap]);
+
+    /**
      * Set up resize observer
      */
     useEffect(() => {
@@ -135,6 +165,55 @@ export const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
         window.removeEventListener('resize', handleResize);
       };
     }, [handleResize]);
+
+    /**
+     * Set up touch event handlers to prevent scrolling and handle taps
+     */
+    useEffect(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      // Prevent default touch behavior (scrolling, zooming)
+      const preventScroll = (e: TouchEvent) => {
+        e.preventDefault();
+      };
+
+      // Handle touch start for tap-to-move
+      const handleTouchStart = (e: TouchEvent) => {
+        e.preventDefault();
+        if (e.touches.length === 1) {
+          const touch = e.touches[0];
+          handleTap(touch.clientX, touch.clientY);
+        }
+      };
+
+      // Handle touch move (continuous movement while dragging)
+      const handleTouchMove = (e: TouchEvent) => {
+        e.preventDefault();
+        if (e.touches.length === 1) {
+          const touch = e.touches[0];
+          handleTap(touch.clientX, touch.clientY);
+        }
+      };
+
+      // Handle mouse click for desktop tap-to-move (optional)
+      const handleClick = (e: MouseEvent) => {
+        handleTap(e.clientX, e.clientY);
+      };
+
+      // Add passive: false to allow preventDefault
+      canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+      canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+      canvas.addEventListener('touchend', preventScroll, { passive: false });
+      canvas.addEventListener('click', handleClick);
+
+      return () => {
+        canvas.removeEventListener('touchstart', handleTouchStart);
+        canvas.removeEventListener('touchmove', handleTouchMove);
+        canvas.removeEventListener('touchend', preventScroll);
+        canvas.removeEventListener('click', handleClick);
+      };
+    }, [handleTap]);
 
     return (
       <div

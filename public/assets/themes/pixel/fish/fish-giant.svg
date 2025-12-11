@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 42" width="56" height="42">
+  <!-- Pixel-style giant fish -->
+  <rect x="14" y="10" width="32" height="22" fill="#BA68C8"/>
+  <rect x="18" y="4" width="24" height="6" fill="#BA68C8"/>
+  <rect x="18" y="32" width="24" height="6" fill="#BA68C8"/>
+  <!-- Tail -->
+  <rect x="2" y="14" width="12" height="14" fill="#AB47BC"/>
+  <rect x="0" y="17" width="2" height="8" fill="#AB47BC"/>
+  <!-- Fins -->
+  <rect x="26" y="0" width="6" height="4" fill="#AB47BC"/>
+  <rect x="26" y="38" width="6" height="4" fill="#AB47BC"/>
+  <!-- Eye -->
+  <rect x="40" y="14" width="7" height="7" fill="white"/>
+  <rect x="43" y="16" width="4" height="4" fill="#333"/>
+</svg>

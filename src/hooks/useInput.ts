@@ -12,6 +12,12 @@ export interface UseInputReturn {
   getVector: () => InputVector;
   getSource: () => InputSource;
   setTouchVector: (vector: InputVector) => void;
+  setTapTarget: (x: number, y: number) => void;
+  setPlayerPosition: (x: number, y: number) => void;
+  clearTapTarget: () => void;
+  hasTapTarget: () => boolean;
+  getTapTarget: () => { x: number; y: number } | null;
+  update: () => void;
 }
 
 export const useInput = (): UseInputReturn => {
@@ -54,11 +60,41 @@ export const useInput = (): UseInputReturn => {
     inputManagerRef.current?.setTouchVector(vector);
   }, []);
 
+  const setTapTarget = useCallback((x: number, y: number): void => {
+    inputManagerRef.current?.setTapTarget(x, y);
+  }, []);
+
+  const setPlayerPosition = useCallback((x: number, y: number): void => {
+    inputManagerRef.current?.setPlayerPosition(x, y);
+  }, []);
+
+  const clearTapTarget = useCallback((): void => {
+    inputManagerRef.current?.clearTapTarget();
+  }, []);
+
+  const hasTapTarget = useCallback((): boolean => {
+    return inputManagerRef.current?.hasTapTarget() ?? false;
+  }, []);
+
+  const getTapTarget = useCallback((): { x: number; y: number } | null => {
+    return inputManagerRef.current?.getTapTarget() ?? null;
+  }, []);
+
+  const update = useCallback((): void => {
+    inputManagerRef.current?.update();
+  }, []);
+
   return {
     inputManager: inputManagerRef.current!,
     getState,
     getVector,
     getSource,
     setTouchVector,
+    setTapTarget,
+    setPlayerPosition,
+    clearTapTarget,
+    hasTapTarget,
+    getTapTarget,
+    update,
   };
 };

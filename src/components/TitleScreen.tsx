@@ -1,16 +1,23 @@
 /**
  * TitleScreen Component
  * 
- * Displays the game title screen with start button and high scores.
+ * Displays the game title screen with start button, high scores, and theme selection.
  * 
- * Requirements: 10.1
+ * Requirements: 10.1, 1.1, 1.3, 6.2, 6.3
  * - WHEN the game initializes THEN the Game State SHALL display the title screen with a start option
+ * - WHEN the user opens the title screen THEN the Game SHALL display a theme selection option
+ * - WHEN a theme is selected THEN the Game SHALL immediately preview the theme by updating visible UI elements
+ * - WHEN sprites are loading THEN the Game SHALL display a loading indicator
+ * - WHEN all sprites are loaded THEN the Game SHALL enable the start game option
  */
 
 'use client';
 
-import React from 'react';
-import type { HighScoreEntry } from '../game/types';
+import React, { useState, useEffect, useCallback } from 'react';
+import type { HighScoreEntry, ThemeId, ThemeInfo } from '../game/types';
+import { ThemeSelector } from './ThemeSelector';
+import { themeManager } from '../game/ThemeManager';
+import { spriteLoader } from '../game/SpriteLoader';
 
 export interface TitleScreenProps {
   /** High score entries to display */
@@ -21,18 +28,20 @@ export interface TitleScreenProps {
 
 /**
  * Format score with commas for readability
+ * Uses a consistent format to avoid hydration mismatches between server and client
  */
 function formatScore(score: number): string {
-  return score.toLocaleString();
+  return score.toLocaleString('en-US');
 }
 
 /**
  * Format timestamp to readable date
+ * Uses a consistent format to avoid hydration mismatches between server and client
  */
 function formatDate(timestamp: string): string {
   try {
     const date = new Date(timestamp);
-    return date.toLocaleDateString();
+    return date.toLocaleDateString('en-US');
   } catch {
     return '';
   }
@@ -41,6 +50,75 @@ function formatDate(timestamp: string): string {
 export function TitleScreen({ highScores, onStart }: TitleScreenProps) {
   const topScore = highScores.length > 0 ? highScores[0] : null;
   
+  // Theme state
+  const [availableThemes, setAvailableThemes] = useState<ThemeInfo[]>([]);
+  const [activeTheme, setActiveTheme] = useState<ThemeId>('classic');
+  const [isLoadingSprites, setIsLoadingSprites] = useState(false);
+  const [spritesLoaded, setSpritesLoaded] = useState(false);
+
+  // Initialize theme state on mount
+  useEffect(() => {
+    setAvailableThemes(themeManager.getAvailableThemes());
+    setActiveTheme(themeManager.getActiveTheme());
+    
+    // Check if sprites are already loaded
+    setSpritesLoaded(spriteLoader.isLoaded());
+    
+    // Subscribe to theme changes
+    const unsubscribe = themeManager.onThemeChange((newTheme) => {
+      setActiveTheme(newTheme);
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // Load sprites on initial mount if not already loaded
+  useEffect(() => {
+    if (!spriteLoader.isLoaded()) {
+      setIsLoadingSprites(true);
+      spriteLoader.loadAll()
+        .then(() => {
+          setSpritesLoaded(true);
+          setIsLoadingSprites(false);
+        })
+        .catch((err) => {
+          console.warn('Failed to load sprites:', err);
+          setIsLoadingSprites(false);
+          // Still allow gameplay even if some sprites failed
+          setSpritesLoaded(true);
+        });
+    }
+  }, []);
+
+  // Handle theme selection
+  const handleSelectTheme = useCallback(async (themeId: ThemeId) => {
+    if (themeId === activeTheme) return;
+    
+    setIsLoadingSprites(true);
+    setSpritesLoaded(false);
+    
+    try {
+      // Update theme in manager (persists to localStorage)
+      await themeManager.setActiveTheme(themeId);
+      
+      // Load sprites for the new theme
+      await spriteLoader.loadTheme(themeId);
+      
+      setSpritesLoaded(true);
+    } catch (err) {
+      console.warn('Failed to load theme sprites:', err);
+      // Still allow gameplay even if some sprites failed
+      setSpritesLoaded(true);
+    } finally {
+      setIsLoadingSprites(false);
+    }
+  }, [activeTheme]);
+
+  // Determine if start button should be enabled
+  const canStart = spritesLoaded && !isLoadingSprites;
+
   return (
     <div style={styles.overlay}>
       <div style={styles.container}>
@@ -59,20 +137,44 @@ export function TitleScreen({ highScores, onStart }: TitleScreenProps) {
           </div>
         )}
         
+        {/* Theme Selector */}
+        <ThemeSelector
+          themes={availableThemes}
+          activeTheme={activeTheme}
+          onSelectTheme={handleSelectTheme}
+          disabled={isLoadingSprites}
+        />
+        
+        {/* Loading Indicator */}
+        {isLoadingSprites && (
+          <div style={styles.loadingContainer}>
+            <div style={styles.loadingSpinner} />
+            <span style={styles.loadingText}>Loading theme...</span>
+          </div>
+        )}
+        
         {/* Start Button */}
         <button 
-          style={styles.startButton}
-          onClick={onStart}
+          style={{
+            ...styles.startButton,
+            ...(canStart ? {} : styles.startButtonDisabled),
+          }}
+          onClick={canStart ? onStart : undefined}
+          disabled={!canStart}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#00aa66';
-            e.currentTarget.style.transform = 'scale(1.05)';
+            if (canStart) {
+              e.currentTarget.style.backgroundColor = '#00aa66';
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#00ff88';
-            e.currentTarget.style.transform = 'scale(1)';
+            if (canStart) {
+              e.currentTarget.style.backgroundColor = '#00ff88';
+              e.currentTarget.style.transform = 'scale(1)';
+            }
           }}
         >
-          START GAME
+          {isLoadingSprites ? 'LOADING...' : 'START GAME'}
         </button>
         
         <p style={styles.controls}>
@@ -171,6 +273,33 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     transition: 'all 0.2s ease',
     boxShadow: '0 5px 0 #006644',
+  },
+  startButtonDisabled: {
+    backgroundColor: '#666666',
+    color: '#999999',
+    cursor: 'not-allowed',
+    boxShadow: '0 5px 0 #444444',
+  },
+  loadingContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '12px 24px',
+    backgroundColor: 'rgba(0, 100, 150, 0.3)',
+    borderRadius: '8px',
+  },
+  loadingSpinner: {
+    width: '20px',
+    height: '20px',
+    border: '3px solid rgba(136, 204, 255, 0.3)',
+    borderTop: '3px solid #88ccff',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+  },
+  loadingText: {
+    fontSize: '14px',
+    color: '#88ccff',
+    letterSpacing: '1px',
   },
   controls: {
     fontSize: '16px',

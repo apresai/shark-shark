@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 48" width="96" height="48">
+  <!-- Pixel-style shark body -->
+  <rect x="16" y="14" width="60" height="20" fill="#424242"/>
+  <rect x="20" y="10" width="52" height="4" fill="#424242"/>
+  <rect x="20" y="34" width="52" height="4" fill="#424242"/>
+  <!-- Tail -->
+  <rect x="2" y="18" width="14" height="12" fill="#757575"/>
+  <rect x="0" y="20" width="2" height="8" fill="#757575"/>
+  <!-- Dorsal fin -->
+  <rect x="44" y="2" width="12" height="8" fill="#424242"/>
+  <rect x="48" y="0" width="4" height="2" fill="#424242"/>
+  <!-- Pectoral fin -->
+  <rect x="44" y="38" width="12" height="6" fill="#424242"/>
+  <!-- Snout -->
+  <rect x="76" y="16" width="16" height="16" fill="#424242"/>
+  <rect x="88" y="20" width="6" height="8" fill="#424242"/>
+  <!-- Eye -->
+  <rect x="70" y="18" width="6" height="6" fill="#212121"/>
+  <rect x="72" y="19" width="2" height="2" fill="#666"/>
+  <!-- Teeth -->
+  <rect x="84" y="28" width="2" height="4" fill="white"/>
+  <rect x="88" y="28" width="2" height="4" fill="white"/>
+  <rect x="80" y="28" width="2" height="3" fill="white"/>
+  <!-- Underbelly -->
+  <rect x="24" y="28" width="48" height="6" fill="#616161"/>
+</svg>

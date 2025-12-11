@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 24" width="32" height="24">
+  <ellipse cx="18" cy="12" rx="11" ry="8" fill="#1A237E"/>
+  <polygon points="1,12 6,3 6,21" fill="#0D1642"/>
+  <polygon points="14,2 18,0 20,4" fill="#0D1642"/>
+  <polygon points="14,22 18,24 20,20" fill="#0D1642"/>
+  <ellipse cx="10" cy="12" rx="3" ry="4" fill="#0D1642" opacity="0.5"/>
+  <!-- Bioluminescent spots -->
+  <circle cx="12" cy="10" r="0.7" fill="#00E5FF"/>
+  <circle cx="14" cy="14" r="0.6" fill="#00E5FF"/>
+  <circle cx="11" cy="13" r="0.5" fill="#00E5FF"/>
+  <circle cx="24" cy="9" r="3.5" fill="#00E5FF"/>
+  <circle cx="24.8" cy="9" r="1.8" fill="#001F3F"/>
+  <circle cx="24" cy="8" r="0.6" fill="#00E5FF"/>
+  <path d="M28,13 Q30,14 28,15" stroke="#00E5FF" stroke-width="0.8" fill="none"/>
+</svg>

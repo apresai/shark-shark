@@ -20,3 +20,6 @@ export type { GameOverScreenProps } from './GameOverScreen';
 
 export { AudioControls } from './AudioControls';
 export type { AudioControlsProps } from './AudioControls';
+
+export { ThemeSelector } from './ThemeSelector';
+export type { ThemeSelectorProps } from './ThemeSelector';

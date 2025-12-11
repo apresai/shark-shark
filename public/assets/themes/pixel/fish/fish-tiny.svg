@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 9" width="12" height="9">
+  <!-- Pixel-style tiny fish -->
+  <rect x="3" y="2" width="7" height="5" fill="#FFE082"/>
+  <rect x="4" y="1" width="5" height="1" fill="#FFE082"/>
+  <rect x="4" y="7" width="5" height="1" fill="#FFE082"/>
+  <!-- Tail -->
+  <rect x="0" y="3" width="3" height="3" fill="#FFD54F"/>
+  <!-- Eye -->
+  <rect x="8" y="3" width="2" height="2" fill="white"/>
+  <rect x="9" y="3" width="1" height="1" fill="#333"/>
+</svg>

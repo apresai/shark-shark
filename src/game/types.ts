@@ -239,3 +239,36 @@ export interface RenderContext {
   canvasWidth: number;
   canvasHeight: number;
 }
+
+// =============================================================================
+// Theme Types
+// =============================================================================
+
+export type ThemeId = 'classic' | 'neon' | 'pixel' | 'deep-sea';
+
+export type PlayerTier = 1 | 2 | 3 | 4 | 5;
+
+export type HazardType = 'shark' | 'crab' | 'jellyfish';
+
+export type UIType = 'life-icon' | 'bubble';
+
+export interface ThemeInfo {
+  id: ThemeId;
+  name: string;           // Display name, e.g., "Classic", "Neon Glow"
+  description: string;    // Brief description of the theme style
+  previewImage?: string;  // Path to theme preview thumbnail
+}
+
+export interface ThemeManifest {
+  id: ThemeId;
+  basePath: string;       // "/assets" for classic, "/assets/themes/neon" for others
+  sprites: {
+    player: Record<PlayerTier, string>;   // tier -> filename
+    fish: Record<FishSize, string>;       // size -> filename
+    hazards: Record<HazardType, string>;  // type -> filename
+    bonus: {
+      seahorse: string;
+    };
+    ui: Record<UIType, string>;           // type -> filename
+  };
+}

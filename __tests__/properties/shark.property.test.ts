@@ -50,15 +50,15 @@ describe('Shark Entity Properties', () => {
   it('Property 12: Shark patrol Y constraint - for any shark in patrol state, its Y position shall be within the upper 60% of the screen', () => {
     fc.assert(
       fc.property(
-        // Generate initial shark position
+        // Generate initial shark position (use noNaN and noDefaultInfinity to avoid invalid values)
         fc.record({
-          x: fc.float({ min: 0, max: 800 }),
-          y: fc.float({ min: 0, max: CANVAS_HEIGHT }),
+          x: fc.float({ min: 0, max: 800, noNaN: true, noDefaultInfinity: true }),
+          y: fc.float({ min: 0, max: CANVAS_HEIGHT, noNaN: true, noDefaultInfinity: true }),
         }),
         // Generate player position (doesn't matter for this test, but needed for update)
         fc.record({
-          x: fc.float({ min: 0, max: 800 }),
-          y: fc.float({ min: 0, max: CANVAS_HEIGHT }),
+          x: fc.float({ min: 0, max: 800, noNaN: true, noDefaultInfinity: true }),
+          y: fc.float({ min: 0, max: CANVAS_HEIGHT, noNaN: true, noDefaultInfinity: true }),
         }),
         // Generate number of update cycles to run
         fc.integer({ min: 1, max: 100 }),

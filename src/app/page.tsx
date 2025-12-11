@@ -189,6 +189,15 @@ export default function GamePage() {
       const dispatch = dispatchRef.current;
       const deltaSeconds = deltaTime / 1000;
       
+      // Update player position for tap-to-move calculations
+      inputRef.current.setPlayerPosition(
+        gameState.player.position.x,
+        gameState.player.position.y
+      );
+      
+      // Update input manager (processes tap-to-move)
+      inputRef.current.update();
+      
       // Get input vector
       const inputVector = inputRef.current.getVector();
       
@@ -281,6 +290,17 @@ export default function GamePage() {
   useEffect(() => {
     dispatchRef.current = gameLoop.dispatch;
   }, [gameLoop.dispatch]);
+
+  // Handle tap-to-move on canvas
+  const handleCanvasTap = useCallback(
+    (x: number, y: number) => {
+      // Only handle taps during gameplay
+      if (gameLoop.gameState.status === 'playing') {
+        input.setTapTarget(x, y);
+      }
+    },
+    [gameLoop.gameState.status, input]
+  );
 
   // Use keyboard controls
   useGameControls(gameLoop);
@@ -421,6 +441,7 @@ export default function GamePage() {
       <GameCanvas
         ref={canvasRef}
         onCanvasReady={handleCanvasReady}
+        onTap={handleCanvasTap}
         className="w-full h-full"
       />
       

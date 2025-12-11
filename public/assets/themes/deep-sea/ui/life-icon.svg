@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <!-- Heart shape - bioluminescent cyan -->
+  <path d="M8,14 Q2,9 2,5 Q2,2 5,2 Q7,2 8,4 Q9,2 11,2 Q14,2 14,5 Q14,9 8,14" fill="#00E5FF"/>
+
+  <!-- Highlight -->
+  <ellipse cx="5" cy="5" rx="1.5" ry="1" fill="white" fill-opacity="0.5"/>
+</svg>

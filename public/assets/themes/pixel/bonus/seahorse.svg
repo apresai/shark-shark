@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 24" width="16" height="24">
+  <!-- Pixel-style seahorse body -->
+  <rect x="5" y="8" width="6" height="10" fill="#FFD700"/>
+  <rect x="6" y="18" width="4" height="4" fill="#FFD700"/>
+  <rect x="7" y="22" width="2" height="2" fill="#FFD700"/>
+  <!-- Belly -->
+  <rect x="8" y="10" width="2" height="6" fill="#FFA500"/>
+  <!-- Head -->
+  <rect x="5" y="2" width="6" height="6" fill="#FFD700"/>
+  <!-- Snout -->
+  <rect x="11" y="4" width="4" height="2" fill="#FFD700"/>
+  <!-- Crown -->
+  <rect x="6" y="0" width="2" height="2" fill="#FFA500"/>
+  <rect x="8" y="0" width="2" height="2" fill="#FFA500"/>
+  <!-- Eye -->
+  <rect x="8" y="3" width="2" height="2" fill="white"/>
+  <rect x="9" y="3" width="1" height="1" fill="#333"/>
+  <!-- Back spines -->
+  <rect x="3" y="8" width="2" height="2" fill="#FFA500"/>
+  <rect x="3" y="11" width="2" height="2" fill="#FFA500"/>
+  <rect x="3" y="14" width="2" height="2" fill="#FFA500"/>
+</svg>
