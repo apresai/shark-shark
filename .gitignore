@@ -67,3 +67,6 @@ next-env.d.ts
 infra/node_modules/
 infra/cdk.out/
 infra/dist/
+
+# OpenNext build output
+.open-next/
