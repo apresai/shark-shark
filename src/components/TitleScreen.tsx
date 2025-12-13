@@ -18,6 +18,8 @@ import type { HighScoreEntry, ThemeId, ThemeInfo } from '../game/types';
 import { ThemeSelector } from './ThemeSelector';
 import { themeManager } from '../game/ThemeManager';
 import { spriteLoader } from '../game/SpriteLoader';
+import { SignInButton } from './SignInButton';
+import { LeaderboardPanel } from './LeaderboardPanel';
 
 export interface TitleScreenProps {
   /** High score entries to display */
@@ -49,12 +51,15 @@ function formatDate(timestamp: string): string {
 
 export function TitleScreen({ highScores, onStart }: TitleScreenProps) {
   const topScore = highScores.length > 0 ? highScores[0] : null;
-  
+
   // Theme state
   const [availableThemes, setAvailableThemes] = useState<ThemeInfo[]>([]);
   const [activeTheme, setActiveTheme] = useState<ThemeId>('classic');
   const [isLoadingSprites, setIsLoadingSprites] = useState(false);
   const [spritesLoaded, setSpritesLoaded] = useState(false);
+
+  // Leaderboard toggle state
+  const [showGlobalLeaderboard, setShowGlobalLeaderboard] = useState(true);
 
   // Initialize theme state on mount
   useEffect(() => {
@@ -121,6 +126,11 @@ export function TitleScreen({ highScores, onStart }: TitleScreenProps) {
 
   return (
     <div style={styles.overlay}>
+      {/* Sign In Button - Fixed at top right */}
+      <div style={styles.signInContainer}>
+        <SignInButton />
+      </div>
+
       <div style={styles.container}>
         {/* Game Title */}
         <div style={styles.titleSection}>
@@ -128,15 +138,47 @@ export function TitleScreen({ highScores, onStart }: TitleScreenProps) {
           <h1 style={styles.titleSecond}>SHARK</h1>
           <p style={styles.subtitle}>🦈 Eat or Be Eaten 🐟</p>
         </div>
-        
-        {/* High Score Banner - show top score prominently */}
-        {topScore && (
-          <div style={styles.topScoreBanner}>
-            <span style={styles.topScoreLabel}>🏆 HIGH SCORE</span>
-            <span style={styles.topScoreValue}>{formatScore(topScore.score)}</span>
+
+        {/* Leaderboard Section */}
+        <div style={styles.leaderboardSection}>
+          {/* Toggle Buttons */}
+          <div style={styles.leaderboardToggle}>
+            <button
+              onClick={() => setShowGlobalLeaderboard(true)}
+              style={{
+                ...styles.toggleButton,
+                ...(showGlobalLeaderboard ? styles.toggleButtonActive : {}),
+              }}
+            >
+              GLOBAL
+            </button>
+            <button
+              onClick={() => setShowGlobalLeaderboard(false)}
+              style={{
+                ...styles.toggleButton,
+                ...(!showGlobalLeaderboard ? styles.toggleButtonActive : {}),
+              }}
+            >
+              LOCAL
+            </button>
           </div>
-        )}
-        
+
+          {/* Leaderboard Content */}
+          {showGlobalLeaderboard ? (
+            <LeaderboardPanel compact />
+          ) : (
+            <>
+              {/* Local High Score Banner */}
+              {topScore && (
+                <div style={styles.topScoreBanner}>
+                  <span style={styles.topScoreLabel}>🏆 LOCAL HIGH SCORE</span>
+                  <span style={styles.topScoreValue}>{formatScore(topScore.score)}</span>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
         {/* Theme Selector */}
         <ThemeSelector
           themes={availableThemes}
@@ -180,18 +222,6 @@ export function TitleScreen({ highScores, onStart }: TitleScreenProps) {
         <p style={styles.controls}>
           Use WASD or Arrow Keys to move
         </p>
-        
-        {/* Recent Scores - compact horizontal display */}
-        {highScores.length > 1 && (
-          <div style={styles.recentScores}>
-            <span style={styles.recentLabel}>Recent:</span>
-            {highScores.slice(1, 4).map((entry, index) => (
-              <span key={index} style={styles.recentEntry}>
-                {formatScore(entry.score)}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -205,66 +235,106 @@ const styles: Record<string, React.CSSProperties> = {
     right: 0,
     bottom: 0,
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'center',
     backgroundColor: 'rgba(0, 20, 40, 0.95)',
     zIndex: 100,
+    overflowY: 'auto',
+    overflowX: 'hidden',
+  },
+  signInContainer: {
+    position: 'absolute',
+    top: '16px',
+    right: '16px',
+    zIndex: 101,
   },
   container: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '24px',
-    padding: '40px',
+    gap: 'clamp(12px, 2vh, 24px)',
+    padding: 'clamp(20px, 4vh, 40px)',
+    paddingTop: 'clamp(60px, 8vh, 80px)',
+    paddingBottom: 'clamp(20px, 4vh, 40px)',
     fontFamily: '"Press Start 2P", "Courier New", monospace',
     color: '#ffffff',
     textAlign: 'center',
+    minHeight: '100%',
+    boxSizing: 'border-box',
   },
   titleSection: {
-    marginBottom: '8px',
+    marginBottom: 'clamp(4px, 1vh, 8px)',
   },
   title: {
-    fontSize: '64px',
+    fontSize: 'clamp(32px, 8vw, 64px)',
     color: '#00ff88',
     margin: 0,
-    textShadow: '5px 5px 0 #006644, 7px 7px 0 #003322',
-    letterSpacing: '10px',
+    textShadow: '3px 3px 0 #006644, 5px 5px 0 #003322',
+    letterSpacing: 'clamp(4px, 1vw, 10px)',
   },
   titleSecond: {
-    fontSize: '64px',
+    fontSize: 'clamp(32px, 8vw, 64px)',
     color: '#ff6644',
-    margin: '-12px 0 0 0',
-    textShadow: '5px 5px 0 #993322, 7px 7px 0 #661100',
-    letterSpacing: '10px',
+    margin: '-8px 0 0 0',
+    textShadow: '3px 3px 0 #993322, 5px 5px 0 #661100',
+    letterSpacing: 'clamp(4px, 1vw, 10px)',
   },
   subtitle: {
-    fontSize: '18px',
+    fontSize: 'clamp(12px, 2vw, 18px)',
     color: '#88ccff',
-    marginTop: '24px',
+    marginTop: 'clamp(12px, 2vh, 24px)',
   },
   topScoreBanner: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     gap: '8px',
-    padding: '16px 32px',
+    padding: 'clamp(12px, 2vh, 16px) clamp(20px, 4vw, 32px)',
     backgroundColor: 'rgba(255, 204, 0, 0.15)',
     borderRadius: '12px',
     border: '2px solid #ffcc00',
   },
   topScoreLabel: {
-    fontSize: '16px',
+    fontSize: 'clamp(10px, 1.5vw, 16px)',
     color: '#ffcc00',
     letterSpacing: '2px',
   },
   topScoreValue: {
-    fontSize: '36px',
+    fontSize: 'clamp(24px, 4vw, 36px)',
     color: '#ffffff',
     textShadow: '2px 2px 0 #000000',
   },
+  leaderboardSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 'clamp(8px, 1.5vh, 12px)',
+    width: '100%',
+    maxWidth: 'min(400px, 90vw)',
+  },
+  leaderboardToggle: {
+    display: 'flex',
+    gap: '8px',
+  },
+  toggleButton: {
+    fontFamily: '"Press Start 2P", "Courier New", monospace',
+    fontSize: 'clamp(8px, 1.2vw, 10px)',
+    padding: 'clamp(6px, 1vh, 8px) clamp(12px, 2vw, 16px)',
+    backgroundColor: 'rgba(0, 100, 150, 0.3)',
+    color: '#88ccff',
+    border: '2px solid rgba(136, 204, 255, 0.3)',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+  toggleButtonActive: {
+    backgroundColor: 'rgba(0, 255, 136, 0.2)',
+    color: '#00ff88',
+    border: '2px solid #00ff88',
+  },
   startButton: {
-    padding: '20px 50px',
-    fontSize: '24px',
+    padding: 'clamp(14px, 2.5vh, 20px) clamp(30px, 6vw, 50px)',
+    fontSize: 'clamp(16px, 3vw, 24px)',
     fontFamily: '"Press Start 2P", "Courier New", monospace',
     backgroundColor: '#00ff88',
     color: '#001428',
@@ -297,28 +367,13 @@ const styles: Record<string, React.CSSProperties> = {
     animation: 'spin 1s linear infinite',
   },
   loadingText: {
-    fontSize: '14px',
+    fontSize: 'clamp(10px, 1.5vw, 14px)',
     color: '#88ccff',
     letterSpacing: '1px',
   },
   controls: {
-    fontSize: '16px',
+    fontSize: 'clamp(10px, 1.5vw, 16px)',
     color: '#88ccff',
-  },
-  recentScores: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-    fontSize: '14px',
-  },
-  recentLabel: {
-    color: '#88ccff',
-  },
-  recentEntry: {
-    color: '#ffffff',
-    padding: '6px 12px',
-    backgroundColor: 'rgba(0, 100, 150, 0.3)',
-    borderRadius: '4px',
   },
 };
 

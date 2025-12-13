@@ -1,0 +1,23 @@
+{
+  "name": "shark-shark-infra",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk",
+    "deploy": "cdk deploy",
+    "diff": "cdk diff",
+    "synth": "cdk synth"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "aws-cdk": "^2.178.0",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "cdk-nextjs-standalone": "^4",
+    "aws-cdk-lib": "^2.178.0",
+    "constructs": "^10.4.2"
+  }
+}

@@ -192,6 +192,32 @@ export interface HighScoreEntry {
   tier: number;
   fishEaten: number;
   timestamp: string;
+  // Optional fields for global leaderboard
+  userId?: string;
+  displayName?: string;
+  photoUrl?: string;
+}
+
+export interface GlobalHighScoreEntry extends Required<HighScoreEntry> {
+  rank: number;
+}
+
+export interface LeaderboardResponse {
+  entries: GlobalHighScoreEntry[];
+  lastUpdated: string;
+}
+
+export interface SaveScoreRequest {
+  score: number;
+  tier: number;
+  fishEaten: number;
+}
+
+export interface SaveScoreResponse {
+  success: boolean;
+  qualified: boolean;
+  rank?: number;
+  error?: string;
 }
 
 export interface HighScoreTable {

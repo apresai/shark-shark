@@ -10,10 +10,11 @@
 
 'use client';
 
-import React from 'react';
-import type { HighScoreEntry } from '../game/types';
+import React, { useState } from 'react';
+import type { HighScoreEntry, SaveScoreResponse } from '../game/types';
 import type { WindowSize } from '../hooks/useWindowSize';
 import { useWindowSize } from '../hooks/useWindowSize';
+import { SignInButton } from './SignInButton';
 
 /**
  * Responsive styles interface for GameOverScreen elements
@@ -112,6 +113,10 @@ export interface GameOverScreenProps {
   fishEaten: number;
   /** Callback when restart button is clicked */
   onRestart: () => void;
+  /** Whether the user is authenticated */
+  isAuthenticated?: boolean;
+  /** Callback to save score to global leaderboard */
+  onSaveScore?: () => Promise<SaveScoreResponse>;
 }
 
 /**
@@ -133,16 +138,40 @@ function formatDate(timestamp: string): string {
   }
 }
 
-export function GameOverScreen({ 
-  finalScore, 
-  highScores, 
-  isNewHighScore, 
-  finalTier, 
-  fishEaten, 
-  onRestart 
+export function GameOverScreen({
+  finalScore,
+  highScores,
+  isNewHighScore,
+  finalTier,
+  fishEaten,
+  onRestart,
+  isAuthenticated = false,
+  onSaveScore,
 }: GameOverScreenProps) {
   const windowSize = useWindowSize();
   const responsiveStyles = getResponsiveStyles(windowSize);
+
+  // Global leaderboard save state
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [globalRank, setGlobalRank] = useState<number | null>(null);
+
+  const handleSaveScore = async () => {
+    if (!onSaveScore) return;
+    setSaveStatus('saving');
+    try {
+      const result = await onSaveScore();
+      if (result.success) {
+        setSaveStatus('saved');
+        if (result.qualified && result.rank) {
+          setGlobalRank(result.rank);
+        }
+      } else {
+        setSaveStatus('error');
+      }
+    } catch {
+      setSaveStatus('error');
+    }
+  };
 
   return (
     <div style={styles.overlay}>
@@ -174,7 +203,40 @@ export function GameOverScreen({
             <span style={{ ...styles.statValue, ...responsiveStyles.statValue }}>{fishEaten}</span>
           </div>
         </div>
-        
+
+        {/* Global Leaderboard Save Section */}
+        <div style={styles.saveSection}>
+          {isAuthenticated ? (
+            <>
+              {saveStatus === 'idle' && (
+                <button onClick={handleSaveScore} style={styles.saveButton}>
+                  SAVE TO GLOBAL LEADERBOARD
+                </button>
+              )}
+              {saveStatus === 'saving' && (
+                <span style={styles.savingText}>Saving...</span>
+              )}
+              {saveStatus === 'saved' && (
+                <div style={styles.savedMessage}>
+                  {globalRank ? (
+                    <span style={styles.rankMessage}>🏆 Ranked #{globalRank} globally!</span>
+                  ) : (
+                    <span style={styles.savedText}>Score saved!</span>
+                  )}
+                </div>
+              )}
+              {saveStatus === 'error' && (
+                <span style={styles.errorText}>Failed to save. Try again?</span>
+              )}
+            </>
+          ) : (
+            <div style={styles.signInPrompt}>
+              <span style={styles.signInText}>Sign in to save your score:</span>
+              <SignInButton compact />
+            </div>
+          )}
+        </div>
+
         {/* Restart Button */}
         <button 
           style={{ ...styles.restartButton, ...responsiveStyles.restartButton }}
@@ -306,6 +368,65 @@ const styles: Record<string, React.CSSProperties> = {
     transition: 'all 0.2s ease',
     boxShadow: '0 6px 0 #993322',
     marginTop: '16px',
+  },
+  saveSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '16px',
+    backgroundColor: 'rgba(0, 100, 150, 0.2)',
+    borderRadius: '12px',
+    border: '1px solid rgba(136, 204, 255, 0.3)',
+  },
+  saveButton: {
+    fontFamily: '"Press Start 2P", "Courier New", monospace',
+    fontSize: '12px',
+    padding: '14px 24px',
+    backgroundColor: 'rgba(0, 255, 136, 0.2)',
+    color: '#00ff88',
+    border: '2px solid #00ff88',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+  savingText: {
+    fontFamily: '"Press Start 2P", "Courier New", monospace',
+    fontSize: '12px',
+    color: '#88ccff',
+  },
+  savedMessage: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  savedText: {
+    fontFamily: '"Press Start 2P", "Courier New", monospace',
+    fontSize: '12px',
+    color: '#00ff88',
+  },
+  rankMessage: {
+    fontFamily: '"Press Start 2P", "Courier New", monospace',
+    fontSize: '14px',
+    color: '#ffcc00',
+    textShadow: '0 0 10px rgba(255, 204, 0, 0.5)',
+  },
+  errorText: {
+    fontFamily: '"Press Start 2P", "Courier New", monospace',
+    fontSize: '12px',
+    color: '#ff6644',
+  },
+  signInPrompt: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '12px',
+  },
+  signInText: {
+    fontFamily: '"Press Start 2P", "Courier New", monospace',
+    fontSize: '10px',
+    color: '#88ccff',
   },
   highScoresSection: {
     marginTop: '24px',

@@ -118,7 +118,24 @@ MAX_DIFFICULTY_TIME = 300s (5 min to max difficulty)
 
 ## Infrastructure
 
-AWS CDK project in `infra/` for static hosting:
-- Static export to `out/` directory
-- S3 bucket + CloudFront distribution
-- Run `cdk deploy` from `infra/` after `npm run build`
+AWS CDK project in `infra/` for OpenNext serverless hosting:
+- Lambda functions for SSR (Graviton2/ARM64, 2GB)
+- DynamoDB for leaderboard high scores
+- CloudFront distribution with cache disabled for troubleshooting
+
+## Deployment
+
+**IMPORTANT**:
+- Always deploy from the project root using `make deploy`. Do not run CDK commands directly from `infra/`.
+- Always deploy to prod on AWS to test changes - there is no staging environment.
+
+```bash
+make deploy    # Sources .env.local, builds Next.js, and deploys via CDK
+```
+
+**Production URL**: https://sharkshark.apresai.dev
+
+### Authentication (Auth.js v5)
+- Google OAuth configured via `src/auth.ts`
+- Environment variables: `AUTH_SECRET`, `AUTH_URL`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`
+- Google OAuth callback: `https://sharkshark.apresai.dev/api/auth/callback/google`

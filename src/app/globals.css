@@ -34,8 +34,13 @@ body {
   -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
 }
 
-/* Prevent pull-to-refresh on the game page */
+/* Prevent pull-to-refresh on the game page and fix viewport sizing */
 html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
   overscroll-behavior: none;
 }
 

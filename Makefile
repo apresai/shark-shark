@@ -50,19 +50,11 @@ test-coverage:
 lint:
 	npm run lint
 
-# Deploy to AWS S3 and CloudFront
-# Default bucket name, can be overridden with AWS_S3_BUCKET environment variable
-AWS_S3_BUCKET ?= cn-shark-shark
-
-deploy: build
-	@echo "Deploying to S3 bucket: $(AWS_S3_BUCKET)"
-	aws s3 sync out/ s3://$(AWS_S3_BUCKET) --delete
-	@if [ -n "$(AWS_CLOUDFRONT_DISTRIBUTION_ID)" ]; then \
-		echo "Invalidating CloudFront distribution: $(AWS_CLOUDFRONT_DISTRIBUTION_ID)"; \
-		aws cloudfront create-invalidation --distribution-id $(AWS_CLOUDFRONT_DISTRIBUTION_ID) --paths "/*"; \
-	else \
-		echo "Warning: AWS_CLOUDFRONT_DISTRIBUTION_ID not set, skipping cache invalidation"; \
-	fi
+# Deploy to AWS using CDK (OpenNext serverless)
+# Sources .env.local for auth secrets before deploying
+deploy:
+	@echo "Deploying via CDK..."
+	@set -a && [ -f .env.local ] && . ./.env.local; set +a && cd infra && npm run cdk deploy -- --require-approval never
 	@echo "Deployment complete!"
 
 # Show help
@@ -78,9 +70,5 @@ help:
 	@echo "  make test-watch    - Run tests in watch mode"
 	@echo "  make test-coverage - Run tests with coverage"
 	@echo "  make lint          - Run ESLint"
-	@echo "  make deploy        - Deploy to AWS S3 and CloudFront"
+	@echo "  make deploy        - Deploy to AWS via CDK (OpenNext serverless)"
 	@echo "  make help          - Show this help message"
-	@echo ""
-	@echo "Deploy environment variables:"
-	@echo "  AWS_S3_BUCKET                  - S3 bucket name (default: cn-shark-shark)"
-	@echo "  AWS_CLOUDFRONT_DISTRIBUTION_ID - CloudFront distribution ID (optional)"

@@ -10,6 +10,7 @@
  */
 
 import React, { useRef, useEffect, useCallback, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import {
   GameCanvas,
   GameCanvasHandle,
@@ -34,7 +35,7 @@ import {
   DifficultySystem
 } from '@/game';
 import { Player, Shark, EntityManager } from '@/game/entities';
-import type { HighScoreEntry, CollisionResult, GameState, FishEntity } from '@/game/types';
+import type { HighScoreEntry, CollisionResult, GameState, FishEntity, SaveScoreResponse } from '@/game/types';
 import { HIGH_SCORE_STORAGE_KEY, SEAHORSE_CONFIG } from '@/game/constants';
 import { gameLogger } from '@/lib/gameLogger';
 import { spriteLoader } from '@/game/SpriteLoader';
@@ -79,6 +80,9 @@ function qualifiesForHighScore(score: number, entries: HighScoreEntry[]): boolea
 }
 
 export default function GamePage() {
+  // Auth session
+  const { data: session } = useSession();
+
   // Refs for game systems
   const canvasRef = useRef<GameCanvasHandle>(null);
   const rendererRef = useRef<Renderer | null>(null);
@@ -86,7 +90,7 @@ export default function GamePage() {
   const entityManagerRef = useRef<EntityManager | null>(null);
   const playerRef = useRef<Player | null>(null);
   const sharkRef = useRef<Shark | null>(null);
-  
+
   // High scores state - initialize from localStorage
   const [highScores, setHighScores] = useState<HighScoreEntry[]>(() => {
     // Only run on client side
@@ -403,6 +407,33 @@ export default function GamePage() {
     gameLoop.resumeGame();
   }, [gameLoop]);
 
+  // Handle saving score to global leaderboard
+  const handleSaveToGlobalLeaderboard = useCallback(async (): Promise<SaveScoreResponse> => {
+    if (!session?.user) {
+      return { success: false, qualified: false, error: 'Not authenticated' };
+    }
+
+    const { score, player } = gameLoop.gameState;
+
+    try {
+      const response = await fetch('/api/leaderboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          score,
+          tier: player.tier,
+          fishEaten: player.fishEaten,
+        }),
+      });
+
+      const result: SaveScoreResponse = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Failed to save score to global leaderboard:', error);
+      return { success: false, qualified: false, error: 'Failed to save score' };
+    }
+  }, [session, gameLoop.gameState]);
+
   // Track previous status to detect game over transition
   const prevStatusRef = useRef(gameLoop.gameState.status);
   
@@ -490,6 +521,8 @@ export default function GamePage() {
           finalTier={gameState.player.tier}
           fishEaten={gameState.player.fishEaten}
           onRestart={handleRestart}
+          isAuthenticated={!!session?.user}
+          onSaveScore={handleSaveToGlobalLeaderboard}
         />
       )}
     </div>
