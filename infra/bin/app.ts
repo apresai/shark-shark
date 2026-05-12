@@ -16,3 +16,9 @@ new SharkSharkStack(app, `SharkSharkStack-${environment}`, {
   },
   description: `Shark Shark game infrastructure with OpenNext (${environment})`,
 });
+
+// Standard cost-allocation tags — propagate to all stacks and resources via CDK Aspects
+cdk.Tags.of(app).add('project',    'sharkshark');
+cdk.Tags.of(app).add('env',        'prod');
+cdk.Tags.of(app).add('managed-by', 'cdk');
+cdk.Tags.of(app).add('owner',      'chad');
