@@ -71,7 +71,7 @@ export class SharkSharkStack extends cdk.Stack {
             memorySize: 2048,  // 2GB
             timeout: Duration.seconds(30),
             architecture: Architecture.ARM_64,  // Graviton2
-            runtime: Runtime.NODEJS_20_X,
+            runtime: Runtime.NODEJS_24_X,
           },
         },
 
