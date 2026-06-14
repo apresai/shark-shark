@@ -5,13 +5,13 @@
 import { CollisionSystem } from '../../../src/game/systems/CollisionSystem';
 import { 
   PlayerState, 
-  FishEntity, 
-  SharkEntity, 
-  CrabEntity, 
+  FishEntity,
+  CrabEntity,
   JellyfishEntity, 
   SeahorseEntity,
   BoundingBox 
 } from '../../../src/game/types';
+import { Shark } from '../../../src/game/entities/Shark';
 import { FISH_POINTS, SHARK_CONFIG, SEAHORSE_CONFIG } from '../../../src/game/constants';
 
 describe('CollisionSystem', () => {
@@ -121,7 +121,7 @@ describe('CollisionSystem', () => {
   });
 
   describe('resolveSharkCollision', () => {
-    let shark: SharkEntity;
+    let shark: Shark;
 
     beforeEach(() => {
       shark = {
@@ -140,7 +140,7 @@ describe('CollisionSystem', () => {
         getBoundingBox: jest.fn().mockReturnValue({ x: 352, y: 176, width: 96, height: 48 }),
         getBodyHitbox: jest.fn().mockReturnValue({ x: 352, y: 176, width: 86.4, height: 48 }), // 90% of width
         getTailHitbox: jest.fn().mockReturnValue({ x: 438.4, y: 176, width: 9.6, height: 48 }), // 10% of width at back
-      } as unknown;
+      } as unknown as Shark;
     });
 
     it('should return shark_tail result when hitting tail zone', () => {

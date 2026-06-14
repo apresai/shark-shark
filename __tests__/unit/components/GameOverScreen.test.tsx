@@ -23,9 +23,9 @@ jest.mock('../../../src/hooks/useWindowSize', () => ({
 
 describe('GameOverScreen', () => {
   const mockHighScores: HighScoreEntry[] = [
-    { score: 1000, tier: 3, timestamp: '2024-01-01T00:00:00Z' },
-    { score: 800, tier: 2, timestamp: '2024-01-02T00:00:00Z' },
-    { score: 600, tier: 2, timestamp: '2024-01-03T00:00:00Z' },
+    { score: 1000, tier: 3, fishEaten: 42, timestamp: '2024-01-01T00:00:00Z' },
+    { score: 800, tier: 2, fishEaten: 30, timestamp: '2024-01-02T00:00:00Z' },
+    { score: 600, tier: 2, fishEaten: 18, timestamp: '2024-01-03T00:00:00Z' },
   ];
 
   const defaultProps = {

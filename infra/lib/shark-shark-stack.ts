@@ -47,6 +47,11 @@ export class SharkSharkStack extends cdk.Stack {
     const nextjs = new Nextjs(this, 'SharkSharkApp', {
       nextjsPath: '../',  // Path to Next.js app from infra directory
 
+      // Use the pinned @opennextjs/aws from the app's node_modules instead of the
+      // construct's default ephemeral `npx @opennextjs/aws@^3 build`, so builds are
+      // deterministic against the version declared in package.json.
+      buildCommand: 'npx @opennextjs/aws build',
+
       // Custom domain configuration
       domainProps: {
         domainName: 'sharkshark.apresai.dev',
