@@ -9,6 +9,9 @@ const config: Config = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
+    // next-auth v5 ships ESM that next/jest won't transform; mock it for component tests
+    // (these tests render UI, not auth flows).
+    '^next-auth/react$': '<rootDir>/__mocks__/next-auth-react.ts',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@/components/(.*)$': '<rootDir>/src/components/$1',
     '^@/game/(.*)$': '<rootDir>/src/game/$1',

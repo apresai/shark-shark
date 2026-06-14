@@ -147,12 +147,12 @@ npm run test:watch
 ## 📝 Development
 
 ### Tech Stack
-- **Framework**: Next.js 14 (App Router)
+- **Framework**: Next.js 16 (App Router), React 19
 - **Language**: TypeScript
 - **Rendering**: HTML5 Canvas
 - **State**: React useReducer
 - **Testing**: Jest + React Testing Library
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS v4
 
 ### Architecture
 - Fixed timestep game loop (60 FPS)
