@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "cdk-nextjs-standalone": "^4.3.3",
-    "aws-cdk-lib": "^2.259.0",
+    "aws-cdk-lib": "^2.260.0",
     "constructs": "^10.6.0"
   },
   "engines": {
