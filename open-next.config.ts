@@ -11,12 +11,15 @@
 //
 // 1. OpenNext's own default install options are invalid on npm >= 12.
 //    `dist/build/installDeps.js` composes the inner install as:
-//        npm install --os=linux --arch=arm64 --target=18 --libc=glibc sharp@0.32.6
-//    `--arch` and `--target` have never been real npm flags. npm's equivalent of
+//        npm install --os=linux --arch=arm64 --target=18 --libc=glibc
+//        sharp@0.32.6
+//    `--arch` and `--target` have never been real npm flags. npm's equivalent
+//    of
 //    the first is `--cpu`, and it has no equivalent of the second. Older npm
 //    ignored unknown flags silently; npm 12 rejects them with EUNKNOWNCONFIG,
 //    the install dies, and `installDependencies` swallows it as a logged
-//    "Could not install dependencies" rather than failing the build. Read out of
+//    "Could not install dependencies" rather than failing the build. Read out
+//    of
 //    the pinned 3.10.4 in node_modules and reproduced against npm 12.0.2 on
 //    2026-08-25. The same defaults are reported present in every published
 //    OpenNext from 3.5.0 through 4.1.1, so upgrading is not a fix.
@@ -35,13 +38,17 @@
 // two reasons.
 //
 // Security first: everything below 0.35.0 carries GHSA-f88m-g3jw-g9cj (HIGH),
-// sharp inheriting libvips CVE-2026-33327 / -33328 / -35590. This repo declares
-// no sharp of its own, so this line is the only thing choosing a version for the
+// sharp inheriting libvips CVE-2026-33327 / -33328 / -35590 / -35591. This repo
+// declares
+// no sharp of its own, so this line is the only thing choosing a version for
+// the
 // image Lambda.
 //
 // Second, 0.32.6 predates the prebuilt @img/* packages and relies on an install
-// script to fetch a binary for the BUILD machine. That is how the pre-fix bundle
-// in this repo ended up holding a Mach-O `sharp-darwin-arm64v8.node` destined for
+// script to fetch a binary for the BUILD machine. That is how the pre-fix
+// bundle
+// in this repo ended up holding a Mach-O `sharp-darwin-arm64v8.node` destined
+// for
 // an ARM64 Linux Lambda. 0.35.x declares no install script at all, so it
 // sidesteps npm 12's script blocking outright. (The 0.33/0.34 line does declare
 // one, `node install/check.js`, but it is only a verification step, so those
@@ -50,10 +57,12 @@
 // This block is only half the fix. The nested install also has to be shielded
 // from the developer's ~/.npmrc, which is why both `build:open-next` in
 // package.json and `buildCommand` in infra/lib/shark-shark-stack.ts prefix the
-// OpenNext invocation with npm_config_userconfig= and npm_config_allow_scripts=.
+// OpenNext invocation with npm_config_userconfig= and
+// npm_config_allow_scripts=.
 // Removing either half puts the image Lambda back to shipping without sharp.
 // Nothing mechanically couples the halves, so both build entries end in
-// scripts/assert-sharp-bundle.mjs, which fails the build unless the bundle really
+// scripts/assert-sharp-bundle.mjs, which fails the build unless the bundle
+// really
 // holds an arm64 sharp at or above the version floor.
 //
 // Same pattern as regist/web, podcaster/portal and eleven9s/admin.
