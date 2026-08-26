@@ -50,7 +50,35 @@ export class SharkSharkStack extends cdk.Stack {
       // Use the pinned @opennextjs/aws from the app's node_modules instead of the
       // construct's default ephemeral `npx @opennextjs/aws@^3 build`, so builds are
       // deterministic against the version declared in package.json.
-      buildCommand: 'npx @opennextjs/aws build',
+      //
+      // The two env-var assignments are required, not decorative. OpenNext shells
+      // out to a nested `npm install` to build the image-optimization bundle's
+      // sharp, and that inner npm inherits this process's environment. Any npm or
+      // npx in the chain (`make deploy` runs `npm run cdk deploy`, and `npx cdk`
+      // does the same) exports npm_config_allow_scripts from the developer's
+      // ~/.npmrc `allow-scripts=` key. npm 12 rejects that variable for
+      // project-scoped installs with EALLOWSCRIPTS, the nested install dies, and
+      // OpenNext only logs "Could not install dependencies" rather than failing,
+      // so the build still reports success and ships an image Lambda with no
+      // sharp at all.
+      //
+      // Both halves are load-bearing. Clearing npm_config_allow_scripts alone is
+      // not enough, because the `npx` below re-reads the user npmrc and re-exports
+      // the variable to the process it launches. Repointing the user config alone
+      // is not enough, because the variable is already in the environment. And
+      // npm_config_userconfig must be spelled in npm's own lowercase env form:
+      // npm and npx export the lowercase name, and when both spellings are
+      // present the lowercase one wins, so an uppercase NPM_CONFIG_USERCONFIG is
+      // silently ignored. Measured on npm 12.0.2, 2026-08-25: the uppercase-only
+      // form let this exact build fail with EALLOWSCRIPTS.
+      //
+      // The prefix lives on this string rather than in the Makefile because the
+      // construct copies the environment through a truthy filter
+      // (NextjsBuild.getBuildEnvVars), which would drop an empty value before it
+      // reached the build. Same pattern as regist/web, podcaster/portal and
+      // eleven9s/admin. See the header comment in ../open-next.config.ts.
+      buildCommand:
+        'npm_config_userconfig=/dev/null npm_config_allow_scripts= npx @opennextjs/aws build',
 
       // Custom domain configuration
       domainProps: {
