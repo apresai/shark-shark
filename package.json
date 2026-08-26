@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:open-next": "npm_config_userconfig=/dev/null npm_config_allow_scripts= npx @opennextjs/aws build",
+    "build:open-next": "npm_config_userconfig=/dev/null npm_config_allow_scripts= npx @opennextjs/aws build && node scripts/assert-sharp-bundle.mjs .open-next/image-optimization-function",
     "start": "next start",
     "lint": "eslint",
     "test": "jest",

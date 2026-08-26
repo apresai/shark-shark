@@ -62,23 +62,44 @@ export class SharkSharkStack extends cdk.Stack {
       // so the build still reports success and ships an image Lambda with no
       // sharp at all.
       //
-      // Both halves are load-bearing. Clearing npm_config_allow_scripts alone is
-      // not enough, because the `npx` below re-reads the user npmrc and re-exports
-      // the variable to the process it launches. Repointing the user config alone
-      // is not enough, because the variable is already in the environment. And
-      // npm_config_userconfig must be spelled in npm's own lowercase env form:
-      // npm and npx export the lowercase name, and when both spellings are
-      // present the lowercase one wins, so an uppercase NPM_CONFIG_USERCONFIG is
-      // silently ignored. Measured on npm 12.0.2, 2026-08-25: the uppercase-only
-      // form let this exact build fail with EALLOWSCRIPTS.
+      // Both halves are load-bearing, for two different reasons. Clearing
+      // npm_config_allow_scripts alone is not enough, because the `npx` below
+      // re-reads the user npmrc and the file's real value beats an empty
+      // environment value, handing the populated list back to the process it
+      // launches. Repointing the user config alone is not enough from inside an
+      // `npm run`, where npm has already exported its own resolved config.
       //
-      // The prefix lives on this string rather than in the Makefile because the
-      // construct copies the environment through a truthy filter
-      // (NextjsBuild.getBuildEnvVars), which would drop an empty value before it
-      // reached the build. Same pattern as regist/web, podcaster/portal and
-      // eleven9s/admin. See the header comment in ../open-next.config.ts.
+      // npm_config_userconfig must be spelled in npm's own lowercase env form,
+      // but NOT because npm prefers lowercase. npm matches /^npm_config_/i and
+      // resolves duplicates by environ ORDER, not by case; with `env` placing
+      // them explicitly, the last-listed spelling wins whichever case it is. The
+      // real reason is replacement versus duplication: a shell prefix using the
+      // SAME spelling as the inherited entry overwrites it, leaving exactly one,
+      // while a different case adds a SECOND entry and the inherited one wins.
+      // Measured on npm 12.0.2, 2026-08-26:
+      //
+      //   npm_config_userconfig=/tmp/A bash -c 'NPM_CONFIG_USERCONFIG=/dev/null ...'
+      //     -> /tmp/A   (the guard silently lost)
+      //   npm_config_userconfig=/tmp/A bash -c 'npm_config_userconfig=/dev/null ...'
+      //     -> /dev/null
+      //
+      // Since npm exports lowercase, matching it is what makes the guard hold.
+      // This is worth stating precisely: someone who believes "npm prefers
+      // lowercase" will write an uppercase guard elsewhere in the chain and get a
+      // silently unguarded nested install.
+      //
+      // The prefix lives on this string rather than in the Makefile because a
+      // Makefile-level guard would be undone by `npm run cdk` re-exporting a
+      // non-empty allow-scripts into the cdk process before the build ever runs.
+      // (The construct also copies the environment through a truthy filter,
+      // NextjsBuild.getBuildEnvVars, but that alone would not defeat the guard:
+      // dropping an empty variable is equivalent to clearing it.)
+      //
+      // Same pattern as regist/web, podcaster/portal and eleven9s/admin. See the
+      // header comment in ../open-next.config.ts.
       buildCommand:
-        'npm_config_userconfig=/dev/null npm_config_allow_scripts= npx @opennextjs/aws build',
+        'npm_config_userconfig=/dev/null npm_config_allow_scripts= npx @opennextjs/aws build' +
+        ' && node scripts/assert-sharp-bundle.mjs .open-next/image-optimization-function',
 
       // Custom domain configuration
       domainProps: {
