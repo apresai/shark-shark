@@ -54,7 +54,8 @@ lint:
 # Sources .env.local for auth secrets before deploying
 deploy:
 	@echo "Deploying via CDK..."
-	@set -a && [ -f .env.local ] && . ./.env.local; set +a && cd infra && npm run cdk deploy -- --require-approval never
+	@[ -f .env.local ] || { echo "ERROR: .env.local is missing. Deploy from a checkout that has it (auth secrets would ship empty)."; exit 1; }
+	@set -a && . ./.env.local && set +a && cd infra && npm run cdk deploy -- --require-approval never
 	@echo "Deployment complete!"
 
 # Show help
