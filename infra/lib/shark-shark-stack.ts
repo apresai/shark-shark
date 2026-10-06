@@ -6,6 +6,17 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import { Nextjs } from 'cdk-nextjs-standalone';
+
+// Auth secrets come from the shell at synth time (make deploy sources
+// .env.local). An empty value used to deploy silently and broke sign-in with
+// Auth.js MissingSecret, so a missing value now fails the synth instead.
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value || value.trim() === '') {
+    throw new Error(`${name} is not set. Run make deploy from a checkout with a populated .env.local.`);
+  }
+  return value;
+}
 import { Construct } from 'constructs';
 
 export interface SharkSharkStackProps extends cdk.StackProps {
@@ -112,10 +123,10 @@ export class SharkSharkStack extends cdk.Stack {
       // Auth secrets are read from environment at deploy time
       environment: {
         HIGH_SCORES_TABLE_NAME: highScoresTable.tableName,
-        AUTH_SECRET: process.env.AUTH_SECRET || '',
+        AUTH_SECRET: requireEnv('AUTH_SECRET'),
         AUTH_URL: process.env.AUTH_URL || 'https://sharkshark.apresai.dev',
-        AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID || '',
-        AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET || '',
+        AUTH_GOOGLE_ID: requireEnv('AUTH_GOOGLE_ID'),
+        AUTH_GOOGLE_SECRET: requireEnv('AUTH_GOOGLE_SECRET'),
       },
 
       overrides: {
