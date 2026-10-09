@@ -110,12 +110,13 @@ for (const bundle of bundles) {
   }
   const [major, minor, patch] = parsed.slice(1, 4).map(Number);
   const prerelease = parsed[4] !== undefined;
-  // A prerelease sorts below its release (semver), so 0.35.5-rc.1 is below 0.35.5.
-  const belowFloor =
-    major < MIN_MAJOR ||
-    (major === MIN_MAJOR && minor < MIN_MINOR) ||
-    (major === MIN_MAJOR && minor === MIN_MINOR && patch < MIN_PATCH) ||
-    (major === MIN_MAJOR && minor === MIN_MINOR && patch === MIN_PATCH && prerelease);
+  // Compare [major, minor, patch] against the floor left to right. On an exact
+  // match a prerelease sorts below its release (semver), so 0.35.5-rc.1 is
+  // below 0.35.5.
+  const floor = [MIN_MAJOR, MIN_MINOR, MIN_PATCH];
+  const parts = [major, minor, patch];
+  const firstDiff = parts.findIndex((n, i) => n !== floor[i]);
+  const belowFloor = firstDiff === -1 ? prerelease : parts[firstDiff] < floor[firstDiff];
   if (belowFloor) {
     fail(
       `${bundle} has sharp ${version}; anything below ${MIN_MAJOR}.${MIN_MINOR}.${MIN_PATCH} ` +
