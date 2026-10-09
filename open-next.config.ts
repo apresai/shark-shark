@@ -34,15 +34,14 @@
 // --cpu to the HOST cpu, so an x86 CI runner would otherwise silently build an
 // x64 sharp for these ARM64 Lambdas.
 //
-// sharp is pinned to 0.35.3 rather than left on OpenNext's 0.32.6 default, for
+// sharp is pinned to 0.35.5 rather than left on OpenNext's 0.32.6 default, for
 // two reasons.
 //
-// Security first: everything below 0.35.0 carries GHSA-f88m-g3jw-g9cj (HIGH),
-// sharp inheriting libvips CVE-2026-33327 / -33328 / -35590 / -35591. This repo
-// declares
-// no sharp of its own, so this line is the only thing choosing a version for
-// the
-// image Lambda.
+// Security first: 0.35.4 and below carry GHSA-wq5f-xc86-pv6w (HIGH, librsvg
+// CVE-2026-96889). Everything below 0.35.0 also carries GHSA-f88m-g3jw-g9cj
+// (HIGH), sharp inheriting libvips CVE-2026-33327 / -33328 / -35590 / -35591.
+// This repo declares no sharp of its own, so this line is the only thing
+// choosing a version for the image Lambda.
 //
 // Second, 0.32.6 predates the prebuilt @img/* packages and relies on an install
 // script to fetch a binary for the BUILD machine. That is how the pre-fix
@@ -71,7 +70,7 @@ const config = {
   default: {},
   imageOptimization: {
     install: {
-      packages: ["sharp@0.35.3"],
+      packages: ["sharp@0.35.5"],
       os: "linux",
       libc: "glibc",
       additionalArgs: "--cpu=arm64",
