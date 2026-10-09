@@ -67,46 +67,33 @@ describe('/api/log', () => {
     consoleError.mockRestore();
   });
 
-  it('writes one JSON line to stdout on Lambda and does not touch the filesystem', async () => {
+  it.each([
+    ['a valid event', JSON.stringify({ event: 'PLAYER_DEATH', data: { lives: 2 }, gameTime: 12.5 })],
+    ['an unreadable body', 'not-json'],
+    ['an oversized payload', JSON.stringify({ event: 'X', data: { blob: 'a'.repeat(100_000) } })],
+  ])('drops POST with %s on Lambda: 204, no filesystem, no log line', async (_label, body) => {
     process.env.AWS_LAMBDA_FUNCTION_NAME = 'shark-shark';
 
-    const response = await POST(postRequest(JSON.stringify({
-      event: 'PLAYER_DEATH',
-      data: { lives: 2 },
-      gameTime: 12.5,
-    })));
+    const response = await POST(postRequest(body));
 
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ success: true });
+    expect(response.status).toBe(204);
     expect(existsSyncMock).not.toHaveBeenCalled();
     expect(mkdirMock).not.toHaveBeenCalled();
     expect(appendFileMock).not.toHaveBeenCalled();
     expect(writeFileMock).not.toHaveBeenCalled();
-    expect(consoleLog).toHaveBeenCalledTimes(1);
-
-    const line = JSON.parse(String(consoleLog.mock.calls[0][0]));
-    expect(line).toEqual({
-      source: 'game-log',
-      timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
-      event: 'PLAYER_DEATH',
-      gameTime: 12.5,
-      data: { lives: 2 },
-    });
+    expect(consoleLog).not.toHaveBeenCalled();
+    expect(consoleError).not.toHaveBeenCalled();
   });
 
-  it('resets by logging LOG_RESET on Lambda instead of rewriting the file', async () => {
+  it('drops DELETE on Lambda: 204, no filesystem, no log line', async () => {
     process.env.AWS_LAMBDA_FUNCTION_NAME = 'shark-shark';
 
     const response = await DELETE();
 
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ success: true });
+    expect(response.status).toBe(204);
     expect(mkdirMock).not.toHaveBeenCalled();
     expect(writeFileMock).not.toHaveBeenCalled();
-    const line = JSON.parse(String(consoleLog.mock.calls[0][0]));
-    expect(line.source).toBe('game-log');
-    expect(line.event).toBe('LOG_RESET');
-    expect(line.data).toBeNull();
+    expect(consoleLog).not.toHaveBeenCalled();
   });
 
   it('appends to game-logs/game.log when not on Lambda', async () => {
@@ -161,8 +148,7 @@ describe('/api/log', () => {
     expect(consoleLog).not.toHaveBeenCalled();
   });
 
-  it('returns 500 for an unreadable body and does not create a directory', async () => {
-    process.env.AWS_LAMBDA_FUNCTION_NAME = 'shark-shark';
+  it('returns 500 for an unreadable body locally and does not create a directory', async () => {
 
     const response = await POST(postRequest('not-json'));
 

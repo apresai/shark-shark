@@ -17,7 +17,8 @@ class GameLogger {
   private startTime: number = 0;
   private enabled: boolean = true;
   private maxLogs: number = 1000;
-  private serverLogging: boolean = true;
+  // The /api/log file sink is a local-development aid; production never sends.
+  private serverLogging: boolean = process.env.NODE_ENV === 'development';
 
   /**
    * Start a new logging session

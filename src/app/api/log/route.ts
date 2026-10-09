@@ -1,9 +1,11 @@
 /**
- * API route for game event logs.
+ * API route for game event logs. A local-development debugging aid.
  *
- * Local dev appends to game-logs/game.log (gitignored). On Lambda, /var/task
- * is read-only, so mkdir there returns 500. Those requests write one JSON
- * line to stdout instead, which CloudWatch already collects.
+ * Local dev appends to game-logs/game.log (gitignored). On Lambda this route
+ * accepts and drops the request: /var/task is read-only, and forwarding every
+ * game event from an unauthenticated endpoint to CloudWatch would let any
+ * caller flood the log group. The client only sends in development anyway
+ * (see gameLogger serverLogging).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -18,32 +20,14 @@ function onLambda(): boolean {
   return Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME);
 }
 
-function writeStdout(entry: {
-  event: unknown;
-  gameTime?: number | null;
-  data?: unknown;
-}): void {
-  console.log(JSON.stringify({
-    source: 'game-log',
-    timestamp: new Date().toISOString(),
-    event: entry.event,
-    gameTime: entry.gameTime ?? null,
-    data: entry.data ?? null,
-  }));
+function dropped(): NextResponse {
+  return new NextResponse(null, { status: 204 });
 }
 
 export async function POST(request: NextRequest) {
+  if (onLambda()) return dropped();
   try {
     const { event, data, gameTime } = await request.json();
-
-    if (onLambda()) {
-      writeStdout({
-        event,
-        gameTime: typeof gameTime === 'number' ? gameTime : null,
-        data,
-      });
-      return NextResponse.json({ success: true });
-    }
 
     // Ensure log directory exists
     if (!existsSync(LOG_DIR)) {
@@ -67,11 +51,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE() {
+  if (onLambda()) return dropped();
   try {
-    if (onLambda()) {
-      writeStdout({ event: 'LOG_RESET' });
-      return NextResponse.json({ success: true });
-    }
 
     // Clear the log file
     if (!existsSync(LOG_DIR)) {
