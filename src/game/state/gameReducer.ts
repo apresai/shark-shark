@@ -64,6 +64,11 @@ function createInitialDifficulty(): DifficultyConfig {
  * Load high score from localStorage
  */
 function loadHighScore(): number {
+  // Node prerender has no localStorage (the binding is undefined). Skip the
+  // read so static generation does not warn on every build.
+  if (typeof localStorage === 'undefined') {
+    return 0;
+  }
   try {
     const stored = localStorage.getItem(HIGH_SCORE_STORAGE_KEY);
     if (stored) {
