@@ -92,7 +92,12 @@ describe('TitleScreen Properties', () => {
     score: fc.integer({ min: 0, max: 1000000 }),
     tier: fc.integer({ min: 1, max: 5 }),
     fishEaten: fc.integer({ min: 0, max: 1000 }),
-    timestamp: fc.date({ min: new Date('2020-01-01'), max: new Date('2030-12-31') }).map(d => d.toISOString()),
+    // noInvalidDate: fc.date otherwise emits one Invalid Date, and toISOString throws.
+    timestamp: fc.date({
+      min: new Date('2020-01-01'),
+      max: new Date('2030-12-31'),
+      noInvalidDate: true,
+    }).map(d => d.toISOString()),
   });
 
   const highScoresArb = fc.array(highScoreEntryArb, { minLength: 0, maxLength: 10 });
