@@ -15,6 +15,28 @@ describe('gameReducer', () => {
     initialState = createInitialGameState();
   });
 
+  describe('createInitialGameState', () => {
+    it('returns highScore 0 without warning when localStorage is undefined', () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const original = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+      Object.defineProperty(globalThis, 'localStorage', {
+        configurable: true,
+        value: undefined,
+      });
+      try {
+        expect(createInitialGameState().highScore).toBe(0);
+        expect(warn).not.toHaveBeenCalled();
+      } finally {
+        warn.mockRestore();
+        if (original) {
+          Object.defineProperty(globalThis, 'localStorage', original);
+        } else {
+          delete (globalThis as { localStorage?: Storage }).localStorage;
+        }
+      }
+    });
+  });
+
   describe('START_GAME', () => {
     it('should transition from title to playing', () => {
       const action: GameAction = { type: 'START_GAME' };

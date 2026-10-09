@@ -18,7 +18,9 @@ const config: Config = {
     '^@/hooks/(.*)$': '<rootDir>/src/hooks/$1',
     '^@/lib/(.*)$': '<rootDir>/src/lib/$1',
   },
-  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/'],
+  // .claude/worktrees is a second checkout of this repo. Jest would collect
+  // those tests and report haste collisions with this package.json.
+  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/', '<rootDir>/.claude/'],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
