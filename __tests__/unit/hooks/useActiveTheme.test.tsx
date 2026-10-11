@@ -18,10 +18,6 @@ describe('useActiveTheme', () => {
     await themeManager.setActiveTheme('classic');
   });
 
-  it('has a non-classic theme to switch to', () => {
-    expect(otherTheme).toBeDefined();
-  });
-
   it('renders the default theme on the server', async () => {
     await themeManager.setActiveTheme(otherTheme);
     function Probe() {

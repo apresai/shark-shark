@@ -1,6 +1,6 @@
 /**
  * useWindowSize - React hook for viewport dimension detection
- *
+ * 
  * Provides SSR-safe window dimension detection with mobile breakpoint.
  * Requirements: 2.1
  */

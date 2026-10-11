@@ -63,10 +63,6 @@ export function PauseScreen({ onResume, score }: PauseScreenProps) {
   }, [activeTheme]);
 
   // Handle resume - theme is already applied when selected
-  const handleResume = useCallback(() => {
-    onResume();
-  }, [onResume]);
-
   // Determine if resume button should be enabled
   const canResume = !isLoadingSprites;
 
@@ -106,7 +102,7 @@ export function PauseScreen({ onResume, score }: PauseScreenProps) {
             ...styles.resumeButton,
             ...(canResume ? {} : styles.resumeButtonDisabled),
           }}
-          onClick={canResume ? handleResume : undefined}
+          onClick={canResume ? onResume : undefined}
           disabled={!canResume}
           onMouseEnter={(e) => {
             if (canResume) {
