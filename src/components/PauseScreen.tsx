@@ -12,11 +12,12 @@
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import type { ThemeId, ThemeInfo } from '../game/types';
+import React, { useState, useCallback } from 'react';
+import type { ThemeId } from '../game/types';
 import { ThemeSelector } from './ThemeSelector';
 import { themeManager } from '../game/ThemeManager';
 import { spriteLoader } from '../game/SpriteLoader';
+import { useActiveTheme } from '../hooks/useActiveTheme';
 
 export interface PauseScreenProps {
   /** Callback when resume button is clicked */
@@ -34,26 +35,11 @@ function formatScore(score: number): string {
 
 export function PauseScreen({ onResume, score }: PauseScreenProps) {
   // Theme state
-  const [availableThemes, setAvailableThemes] = useState<ThemeInfo[]>([]);
-  const [activeTheme, setActiveTheme] = useState<ThemeId>('classic');
+  // The theme registry is static, so read it once.
+  const [availableThemes] = useState(() => themeManager.getAvailableThemes());
+  const activeTheme = useActiveTheme();
   const [isLoadingSprites, setIsLoadingSprites] = useState(false);
   const [pendingTheme, setPendingTheme] = useState<ThemeId | null>(null);
-
-  // Initialize theme state on mount
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- mount-time sync from the themeManager singleton
-    setAvailableThemes(themeManager.getAvailableThemes());
-    setActiveTheme(themeManager.getActiveTheme());
-    
-    // Subscribe to theme changes
-    const unsubscribe = themeManager.onThemeChange((newTheme) => {
-      setActiveTheme(newTheme);
-    });
-    
-    return () => {
-      unsubscribe();
-    };
-  }, []);
 
   // Handle theme selection
   const handleSelectTheme = useCallback(async (themeId: ThemeId) => {

@@ -120,24 +120,26 @@ export function LeaderboardPanel({ compact = false, highlightUserId, onClose }: 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchLeaderboard = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await fetch('/api/leaderboard');
-      if (!res.ok) throw new Error('Failed to fetch');
-      const data: LeaderboardResponse = await res.json();
-      setLeaderboard(data.entries);
-    } catch {
-      setError('Failed to load leaderboard');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Fetch once on mount. loading starts true and error starts null, so no
+  // synchronous state reset is needed; the cancelled flag drops results that
+  // arrive after unmount.
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount; the loading/error state is set by the fetch itself
-    fetchLeaderboard();
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/leaderboard');
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data: LeaderboardResponse = await res.json();
+        if (!cancelled) setLeaderboard(data.entries);
+      } catch {
+        if (!cancelled) setError('Failed to load leaderboard');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const formatScore = (score: number) => score.toLocaleString();

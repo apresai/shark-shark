@@ -14,10 +14,11 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import type { HighScoreEntry, ThemeId, ThemeInfo } from '../game/types';
+import type { HighScoreEntry, ThemeId } from '../game/types';
 import { ThemeSelector } from './ThemeSelector';
 import { themeManager } from '../game/ThemeManager';
 import { spriteLoader } from '../game/SpriteLoader';
+import { useActiveTheme } from '../hooks/useActiveTheme';
 import { SignInButton } from './SignInButton';
 import { LeaderboardPanel } from './LeaderboardPanel';
 
@@ -53,38 +54,21 @@ export function TitleScreen({ highScores, onStart }: TitleScreenProps) {
   const topScore = highScores.length > 0 ? highScores[0] : null;
 
   // Theme state
-  const [availableThemes, setAvailableThemes] = useState<ThemeInfo[]>([]);
-  const [activeTheme, setActiveTheme] = useState<ThemeId>('classic');
-  const [isLoadingSprites, setIsLoadingSprites] = useState(false);
-  const [spritesLoaded, setSpritesLoaded] = useState(false);
+  // The theme registry is static, so read it once.
+  const [availableThemes] = useState(() => themeManager.getAvailableThemes());
+  const activeTheme = useActiveTheme();
+  // Starts true when the mount effect below is about to load sprites.
+  const [isLoadingSprites, setIsLoadingSprites] = useState(() => !spriteLoader.isLoaded());
+  // Fresh page load: false on both server and client (sprites load client-side),
+  // so hydration matches. Returning to the title later starts at true.
+  const [spritesLoaded, setSpritesLoaded] = useState(() => spriteLoader.isLoaded());
 
   // Leaderboard toggle state
   const [showGlobalLeaderboard, setShowGlobalLeaderboard] = useState(true);
 
-  // Initialize theme state on mount
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- mount-time sync from the themeManager singleton
-    setAvailableThemes(themeManager.getAvailableThemes());
-    setActiveTheme(themeManager.getActiveTheme());
-    
-    // Check if sprites are already loaded
-    setSpritesLoaded(spriteLoader.isLoaded());
-    
-    // Subscribe to theme changes
-    const unsubscribe = themeManager.onThemeChange((newTheme) => {
-      setActiveTheme(newTheme);
-    });
-    
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
   // Load sprites on initial mount if not already loaded
   useEffect(() => {
     if (!spriteLoader.isLoaded()) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- loading flag set before the async sprite load starts
-      setIsLoadingSprites(true);
       spriteLoader.loadAll()
         .then(() => {
           setSpritesLoaded(true);

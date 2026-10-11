@@ -13,3 +13,5 @@ export type { UseAudioOptions, UseAudioReturn } from './useAudio';
 
 export { useWindowSize } from './useWindowSize';
 export type { WindowSize } from './useWindowSize';
+
+export { useActiveTheme } from './useActiveTheme';
