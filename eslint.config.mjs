@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // OpenNext and CDK build output (gitignored), linted otherwise after a build.
+    ".open-next/**",
+    "infra/cdk.out/**",
   ]),
 ]);
 

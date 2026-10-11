@@ -336,6 +336,7 @@ export default function GamePage() {
   useEffect(() => {
     const scores = loadHighScores();
     if (scores.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- post-hydration read of localStorage high scores; SSR renders none
       setHighScores(scores);
     }
   }, []);
@@ -455,7 +456,7 @@ export default function GamePage() {
           timestamp: new Date().toISOString()
         };
         saveHighScore(entry);
-        // Use callback form to avoid direct setState in effect
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- high score recorded once when the game-over transition is observed
         setHighScores(loadHighScores());
         setIsNewHighScore(true);
       }

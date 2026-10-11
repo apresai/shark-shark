@@ -41,6 +41,7 @@ export function PauseScreen({ onResume, score }: PauseScreenProps) {
 
   // Initialize theme state on mount
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- mount-time sync from the themeManager singleton
     setAvailableThemes(themeManager.getAvailableThemes());
     setActiveTheme(themeManager.getActiveTheme());
     

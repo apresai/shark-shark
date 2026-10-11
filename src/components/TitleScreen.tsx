@@ -63,6 +63,7 @@ export function TitleScreen({ highScores, onStart }: TitleScreenProps) {
 
   // Initialize theme state on mount
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- mount-time sync from the themeManager singleton
     setAvailableThemes(themeManager.getAvailableThemes());
     setActiveTheme(themeManager.getActiveTheme());
     
@@ -82,6 +83,7 @@ export function TitleScreen({ highScores, onStart }: TitleScreenProps) {
   // Load sprites on initial mount if not already loaded
   useEffect(() => {
     if (!spriteLoader.isLoaded()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- loading flag set before the async sprite load starts
       setIsLoadingSprites(true);
       spriteLoader.loadAll()
         .then(() => {
