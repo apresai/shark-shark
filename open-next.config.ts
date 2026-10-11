@@ -1,7 +1,8 @@
 // OpenNext configuration for @opennextjs/aws.
 // Minimal config: defaults are applied for the server, image-optimization,
 // revalidation, and warmer functions. The CDK `Nextjs` construct
-// (cdk-nextjs-standalone) runs `npx @opennextjs/aws build` against this file.
+// (cdk-nextjs-standalone) runs the locally installed `open-next build` (pinned
+// in package.json) against this file.
 //
 // ---------------------------------------------------------------------------
 // DO NOT DELETE THE `imageOptimization.install` BLOCK BELOW.
@@ -21,8 +22,9 @@
 //    "Could not install dependencies" rather than failing the build. Read out
 //    of
 //    the pinned 3.10.4 in node_modules and reproduced against npm 12.0.2 on
-//    2026-08-25. The same defaults are reported present in every published
-//    OpenNext from 3.5.0 through 4.1.1, so upgrading is not a fix.
+//    2026-08-25, and re-read unchanged in the pinned 4.1.8 on 2026-10-11
+//    (createImageOptimizationBundle.js still defaults to arch arm64 and
+//    nodeVersion 18), so upgrading is not a fix.
 //    The two config fields that emit those two flags are `arch` and
 //    `nodeVersion`, so this override omits both and passes npm's real flag via
 //    `additionalArgs`.

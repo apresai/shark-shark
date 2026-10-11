@@ -58,9 +58,11 @@ export class SharkSharkStack extends cdk.Stack {
     const nextjs = new Nextjs(this, 'SharkSharkApp', {
       nextjsPath: '../',  // Path to Next.js app from infra directory
 
-      // Use the pinned @opennextjs/aws from the app's node_modules instead of the
-      // construct's default ephemeral `npx @opennextjs/aws@^3 build`, so builds are
-      // deterministic against the version declared in package.json.
+      // Run the app's locally installed open-next binary (the @opennextjs/aws
+      // version pinned exactly in package.json) instead of the construct's default
+      // ephemeral `npx @opennextjs/aws@^3 build`. Calling the binary directly,
+      // rather than through npx, makes a missing install fail the synth instead of
+      // silently fetching some other version. Same as `build:open-next`.
       //
       // The two env-var assignments are required, not decorative. OpenNext shells
       // out to a nested `npm install` to build the image-optimization bundle's
@@ -74,10 +76,10 @@ export class SharkSharkStack extends cdk.Stack {
       // sharp at all.
       //
       // Both halves are load-bearing, for two different reasons. Clearing
-      // npm_config_allow_scripts alone is not enough, because the `npx` below
+      // npm_config_allow_scripts alone is not enough, because the nested npm
       // re-reads the user npmrc and the file's real value beats an empty
-      // environment value, handing the populated list back to the process it
-      // launches. Repointing the user config alone is not enough from inside an
+      // environment value, handing the populated list back to the install it
+      // runs. Repointing the user config alone is not enough from inside an
       // `npm run`, where npm has already exported its own resolved config.
       //
       // npm_config_userconfig must be spelled in npm's own lowercase env form,
@@ -109,7 +111,7 @@ export class SharkSharkStack extends cdk.Stack {
       // Same pattern as regist/web, podcaster/portal and eleven9s/admin. See the
       // header comment in ../open-next.config.ts.
       buildCommand:
-        'npm_config_userconfig=/dev/null npm_config_allow_scripts= npx @opennextjs/aws build' +
+        'npm_config_userconfig=/dev/null npm_config_allow_scripts= ./node_modules/.bin/open-next build' +
         ' && node scripts/assert-sharp-bundle.mjs .open-next/image-optimization-function',
 
       // Custom domain configuration

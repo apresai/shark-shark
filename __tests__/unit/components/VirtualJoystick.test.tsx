@@ -18,7 +18,7 @@ const createTouchEvent = (type: string, touches: Array<{ clientX: number; client
       radiusY: 1,
       rotationAngle: 0,
       force: 1,
-    })) as any,
+    })) as unknown as Touch[],
     bubbles: true,
   });
 };

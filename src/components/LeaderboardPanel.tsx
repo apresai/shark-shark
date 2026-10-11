@@ -120,10 +120,6 @@ export function LeaderboardPanel({ compact = false, highlightUserId, onClose }: 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchLeaderboard();
-  }, []);
-
   const fetchLeaderboard = async () => {
     try {
       setLoading(true);
@@ -138,6 +134,11 @@ export function LeaderboardPanel({ compact = false, highlightUserId, onClose }: 
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount; the loading/error state is set by the fetch itself
+    fetchLeaderboard();
+  }, []);
 
   const formatScore = (score: number) => score.toLocaleString();
 

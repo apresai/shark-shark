@@ -84,7 +84,9 @@ export const useInput = (): UseInputReturn => {
     inputManagerRef.current?.update();
   }, []);
 
+  // eslint-disable-next-line react-hooks/refs -- inputManager is kept for the UseInputReturn type; no caller reads it, they use the callbacks
   return {
+    // eslint-disable-next-line react-hooks/refs -- same reason as above
     inputManager: inputManagerRef.current!,
     getState,
     getVector,

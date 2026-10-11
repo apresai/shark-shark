@@ -46,6 +46,7 @@ export function useWindowSize(): WindowSize {
 
   useEffect(() => {
     // Set initial size on mount (client-side only)
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- post-hydration read of window size; SSR renders the default
     setWindowSize(getWindowSize());
 
     const handleResize = () => {
