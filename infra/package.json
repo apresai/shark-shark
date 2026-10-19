@@ -12,12 +12,12 @@
   },
   "devDependencies": {
     "@types/node": "^24",
-    "aws-cdk": "^2.1126.0",
+    "aws-cdk": "2.1145.0",
     "typescript": "^5"
   },
   "dependencies": {
+    "aws-cdk-lib": "2.273.0",
     "cdk-nextjs-standalone": "^4.3.3",
-    "aws-cdk-lib": "^2.260.0",
     "constructs": "^10.6.0"
   },
   "engines": {
