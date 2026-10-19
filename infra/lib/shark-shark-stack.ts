@@ -6,6 +6,7 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import { Nextjs } from 'cdk-nextjs-standalone';
+import { forceArm64Lambdas } from './force-arm64';
 
 // Auth secrets come from the shell at synth time (make deploy sources
 // .env.local). An empty value used to deploy silently and broke sign-in with
@@ -181,6 +182,10 @@ export class SharkSharkStack extends cdk.Stack {
     if (nextjs.serverFunction?.lambdaFunction) {
       highScoresTable.grantReadWriteData(nextjs.serverFunction.lambdaFunction);
     }
+
+    // CDK helper Lambdas (LogRetention, S3 auto-delete, custom resources) have no
+    // Architectures property and would deploy as x86_64.
+    forceArm64Lambdas(this);
 
     // Stack outputs
     new cdk.CfnOutput(this, 'DistributionUrl', {
