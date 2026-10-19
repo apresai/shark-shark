@@ -15,8 +15,8 @@
     "deploy:diff": "npm run build:open-next && cd infra && npx cdk diff"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.1068.0",
-    "@aws-sdk/util-dynamodb": "^3.996.4",
+    "@aws-sdk/client-dynamodb": "3.1152.0",
+    "@aws-sdk/util-dynamodb": "3.996.9",
     "@opennextjs/aws": "4.1.8",
     "next": "16.3.8",
     "next-auth": "5.0.0-beta.32",
