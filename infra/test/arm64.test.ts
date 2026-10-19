@@ -7,8 +7,9 @@ import * as cdk from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import { SharkSharkStack } from '../lib/shark-shark-stack';
 
-// Runtimes AWS Lambda no longer accepts for new functions or is about to retire.
-const DEPRECATED_RUNTIME = /^(nodejs(1[0-9]|20)\.x|nodejs[0-9]\.[0-9]+\.?x?|python3\.(?:[0-9]|1[01])|go1\.x|provided$)/;
+// Allowlist: current Active LTS Node runtimes only (house rule: never nodejs20.x
+// or older) plus provided.al2023 for any future Go Lambda.
+const ALLOWED_RUNTIME = /^(nodejs(22|24)\.x|provided\.al2023)$/;
 
 describe('SharkSharkStack Lambdas', () => {
   const infraDir = path.resolve(__dirname, '..');
@@ -53,10 +54,10 @@ describe('SharkSharkStack Lambdas', () => {
     expect(offenders).toEqual([]);
   });
 
-  test('no Lambda uses a deprecated runtime', () => {
+  test('every Lambda uses an allowed, non-deprecated runtime', () => {
     const fns = template.findResources('AWS::Lambda::Function');
     const offenders = Object.entries(fns)
-      .filter(([, r]) => DEPRECATED_RUNTIME.test(String(r.Properties.Runtime ?? 'provided')))
+      .filter(([, r]) => !ALLOWED_RUNTIME.test(String(r.Properties.Runtime)))
       .map(([id, r]) => `${id}: ${r.Properties.Runtime}`);
     expect(offenders).toEqual([]);
   });
